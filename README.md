@@ -7,8 +7,10 @@ Packaging Differentiation
 
 `Assets`: 5 kits, 6 images for each kit, one for each side of the packaging box.
 
-`Requirements`:Use mobile phone and/or tablet camera/video to capture an image of the product packaging – **this should work in any orientation and is intended to be captured by a child**
+`Requirements`:
 
-Compare this to an inventory of preloaded database assets and determine the product being captured. 
+(1) Use mobile phone and/or tablet camera/video to capture an image of the product packaging – **this should work in any orientation and is intended to be captured by a child**
 
-It should be possible to load additional assets into the database and to identify new packages without further configuration.
+(2) Compare this to an inventory of preloaded database assets and determine the product being captured. 
+
+(3) It should be possible to load additional assets into the database and to identify new packages without further configuration.
