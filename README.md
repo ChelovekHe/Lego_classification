@@ -14,3 +14,11 @@ Packaging Differentiation
 (2) Compare this to an inventory of preloaded database assets and determine the product being captured. 
 
 (3) It should be possible to load additional assets into the database and to identify new packages without further configuration.
+
+![alt text](https://github.com/harrysocool/package_identification/blob/master/1.pic_hd.jpg "fig 1")
+
+![alt text](https://github.com/harrysocool/package_identification/blob/master/2.pic_hd.jpg "fig 2")
+![alt text](https://github.com/harrysocool/package_identification/blob/master/3.pic_hd.jpg "fig 3")
+![alt text](https://github.com/harrysocool/package_identification/blob/master/4.pic_hd.jpg "fig 4")
+![alt 5ext](https://github.com/harrysocool/package_identification/blob/master/5.pic_hd.jpg "fig 5")
+![alt text](https://github.com/harrysocool/package_identification/blob/master/6.pic_hd.jpg "fig 6")
