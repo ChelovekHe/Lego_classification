@@ -1,5 +1,0 @@
-import os
-import barcode_detector as bd
-
-p = os.listdir('../fig/Box 3')
-bd.barcode_detector('../fig/Box 3/' + p[3])
