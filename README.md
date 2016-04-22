@@ -15,8 +15,9 @@ Packaging Differentiation
 
 (3) It should be possible to load additional assets into the database and to identify new packages without further configuration.
 
-![alt text](https://github.com/harrysocool/package_identification/blob/master/1.pic_hd.jpg "fig 1")
+**Figures below is from the Box 6 kit, contain 6 images from 6 different orientation**
 
+![alt text](https://github.com/harrysocool/package_identification/blob/master/1.pic_hd.jpg "fig 1")
 ![alt text](https://github.com/harrysocool/package_identification/blob/master/2.pic_hd.jpg "fig 2")
 ![alt text](https://github.com/harrysocool/package_identification/blob/master/3.pic_hd.jpg "fig 3")
 ![alt text](https://github.com/harrysocool/package_identification/blob/master/4.pic_hd.jpg "fig 4")
