@@ -7,8 +7,7 @@ p1 = os.listdir('../fig')
 p2 = os.listdir('../fig/' + p1[1] +'/')
 
 # load the image and convert it to grayscale
-# image = cv2.imread('../fig/'+ p1[1] + '/' + p2[0])
-image = cv2.imread('/Users/harrysocool/Github/package_identification/1.pic_hd.jpg')
+image = cv2.imread('../fig/'+ p1[1] + '/' + p2[5])
 image = cv2.resize(image,(0,0),fx = 0.2,fy = 0.2)
 
 # Convert BGR to HSV
@@ -29,7 +28,7 @@ mask = mask1 + mask2
 
 _, contours, _ = cv2.findContours(mask,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 contours = sorted(contours, key = cv2.contourArea, reverse = True)
-
+new_contours = []
 for idx, contour in enumerate(contours):
     if idx > 5:
         break
@@ -37,12 +36,15 @@ for idx, contour in enumerate(contours):
     area = cv2.contourArea(contour)
     perimeter = cv2.arcLength(contour,True)
     if ((np.sqrt(area)*4 <= perimeter*1.1) & (np.sqrt(area)*4 >= perimeter*0.9)):
+        new_contours.append(contour)
 
-        print(idx)
-        # compute the rotated bounding box of the contour
-        rect = cv2.minAreaRect(contour)
-        box = np.int0(cv2.boxPoints(rect))
-        cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
+cnt = sorted(new_contours, key = cv2.contourArea, reverse = True)[0]
+
+# compute the rotated bounding box of the contour
+rect = cv2.minAreaRect(cnt)
+box = np.int0(cv2.boxPoints(rect))
+print(box)
+cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
 
 cv2.imshow("Image", image)
 cv2.waitKey(0)
