@@ -65,3 +65,4 @@ target/
 fig/
 *.docx
 .DS*
+.idea/
