@@ -9,8 +9,8 @@ def barcode_detect(image):
 
     # compute the Scharr gradient magnitude representation of the images
     # in both the x and y direction
-    gradX = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
-    gradY = cv2.Sobel(gray, ddepth=cv2.CV_32F, dx=0, dy=1, ksize=-1)
+    gradX = cv2.Sobel(gray, ddepth=cv2.CV_64F, dx=1, dy=0, ksize=-1)
+    gradY = cv2.Sobel(gray, ddepth=cv2.CV_64F, dx=0, dy=1, ksize=-1)
 
     # subtract the y-gradient from the x-gradient
     gradient = cv2.subtract(gradX, gradY)

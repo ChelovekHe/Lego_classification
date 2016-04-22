@@ -2,14 +2,15 @@
 import numpy as np
 import cv2
 
+
 class Lego(object):
-    def __init__(self,image):
-        self.image = image
+    def __init__(self, image):
+        self._image = image
         self.logo_detect()
         self.barcode_detect()
 
     def logo_detect(self):
-        image = self.image
+        image = self._image
         rows, cols, _ = image.shape
 
         # Convert BGR to HSV
@@ -36,7 +37,7 @@ class Lego(object):
             # moment = cv2.moments(contour)
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-            if ((np.sqrt(area) * 4 <= perimeter * 1.1) & (np.sqrt(area) * 4 >= perimeter * 0.9)):
+            if (np.sqrt(area) * 4 <= perimeter * 1.1) & (np.sqrt(area) * 4 >= perimeter * 0.9):
                 new_contours.append(contour)
 
         cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
@@ -47,14 +48,14 @@ class Lego(object):
 
         # print(rect[2])
 
-        if (rect[2] < -1):
+        if rect[2] < -1:
             rotate_angle = rect[2] + 90
         else:
             rotate_angle = rect[2]
 
         # rotate the image
-        M = cv2.getRotationMatrix2D(tuple(box[2]), rotate_angle, 1)
-        self.rot_img = cv2.warpAffine(image, M, (cols, rows))
+        Point = cv2.getRotationMatrix2D(tuple(box[2]), rotate_angle, 1)
+        self._rot_img = cv2.warpAffine(image, Point, (cols, rows))
 
         cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
 
@@ -65,24 +66,24 @@ class Lego(object):
         rows_ed = rows_st + rect[1][0]
         # print([cols_st,cols_ed, rows_st,rows_ed])
 
-        self.logo = self.rot_img[cols_st:cols_ed, rows_st:rows_ed]
-        self.logo_box = box
+        self._logo = self._rot_img[cols_st:cols_ed, rows_st:rows_ed]
+        self._logo_box = box
 
     def barcode_detect(self):
-        image = self.rot_img
+        image = self._rot_img
         # load the image and convert it to grayscale
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        sobelx = cv2.Sobel(gray,cv2.CV_64F,1,0,ksize=3)
-        sobely = cv2.Sobel(gray,cv2.CV_64F,0,1,ksize=3)
+        sobelgx = cv2.Sobel(gray,cv2.CV_64F,1,0,ksize=3)
+        sobelgy = cv2.Sobel(gray,cv2.CV_64F,0,1,ksize=3)
 
         # subtract the y-gradient from the x-gradient
-        gradient = cv2.subtract(sobelx, sobely)
-        gradient = cv2.convertScaleAbs(gradient)
+        gradient = sobelgx - sobelgy
+        # gradient = cv2.convertScaleAbs(gradient)
 
         # blur and threshold the image
         blurred = cv2.blur(gradient, (3, 3))
-        _,thresh = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY)
+        _,thresh = cv2.threshold(gradient, 225, 255, cv2.THRESH_BINARY)
 
         # construct a closing kernel and apply it to the thresholded image
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
@@ -99,14 +100,20 @@ class Lego(object):
 
         # compute the rotated bounding box of the largest contour
         rect = cv2.minAreaRect(c)
-        self.barcode_box = np.int0(cv2.boxPoints(rect))
+        self._barcode_box = np.int0(cv2.boxPoints(rect))
 
-        cv2.imshow("I1",closed)
+        cv2.imshow("I1", gradient)
         # cv2.imshow("I2",gradient2)
         cv2.waitKey(0)
 
-    def getLogo(self):
-        return self.logo
+    def getLogoImage(self):
+        return self._logo
 
     def getRotatedImage(self):
-        return self.rot_img
+        return self._rot_img
+
+    def getLogoBox(self):
+        return self._logo_box
+
+    def getBarcodeBox(self):
+        return self._barcode_box

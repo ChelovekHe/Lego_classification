@@ -2,6 +2,7 @@
 # import the necessary packages
 import os
 import cv2
+import barcode_detect as bd
 from Lego import Lego
 
 p1 = os.listdir('../fig')
@@ -13,15 +14,17 @@ image = cv2.imread('../fig/'+ p1[3] + '/' + p2[3])
 image = cv2.resize(image,(0,0),fx = 0.1,fy = 0.1)
 
 l = Lego(image)
-rot_image = l.getRotatedImage()
 
-bar_box = l.barcode_box
-logo_box = l.logo_box
-logo_image = l.getLogo()
+rot_image = l.getRotatedImage()
+logo_image = l.getLogoImage()
+barcode_box = l.getBarcodeBox()
+# barcode_box = bd.barcode_detect(rot_image)
+logo_box = l.getLogoBox()
+
 
 # draw a bounding box arounded the detected barcode and display the
 # image
-cv2.drawContours(image, [bar_box,logo_box], -1, (0, 255, 0), 3)
+cv2.drawContours(image, [barcode_box,logo_box], -1, (0, 255, 0), 3)
 cv2.imshow("Image1",image)
 cv2.imshow("Image2",logo_image)
 cv2.waitKey(0)
