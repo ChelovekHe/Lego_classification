@@ -73,16 +73,14 @@ class Lego(object):
 
             # when the detect logo is square, set flag true
             height, width, _ = self._logo.shape
-            if abs(height - width) < 0.1*np.mean([height,width]):
+            if abs(height - width) < 0.1*np.mean([height, width]):
                 self._hasValidLogo = True
-
-
 
     def _get_rotate_angle(self):
         akaze = cv2.AKAZE_create()
 
-        gray_image1 = cv2.cvtColor(self._pureLogo,cv2.COLOR_BGR2GRAY)
-        gray_image2 = cv2.cvtColor(self._logo,cv2.COLOR_BGR2GRAY)
+        gray_image1 = cv2.cvtColor(self._pureLogo, cv2.COLOR_BGR2GRAY)
+        gray_image2 = cv2.cvtColor(self._logo, cv2.COLOR_BGR2GRAY)
 
         kp1, des1 = akaze.detectAndCompute(gray_image1, None)
         kp2, des2 = akaze.detectAndCompute(gray_image2, None)
@@ -92,17 +90,17 @@ class Lego(object):
         matches = bf.knnMatch(des1, des2, k=2)
 
         good_matches = []
-        for m,n in matches:
+        for m, n in matches:
             if m.distance < 0.7*n.distance:
                 good_matches.append(m)
 
         MIN_MATCH_COUNT = 6
         MAX_MATCH_COUNT = 10
-        if len(good_matches) >= MIN_MATCH_COUNT & len(good_matches) <= MAX_MATCH_COUNT :
-            src_pts = np.float64([ kp1[m.queryIdx].pt for m in good_matches ]).reshape(-1,1,2)
-            dst_pts = np.float64([ kp2[m.trainIdx].pt for m in good_matches ]).reshape(-1,1,2)
+        if len(good_matches) >= MIN_MATCH_COUNT & len(good_matches) <= MAX_MATCH_COUNT:
+            src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+            dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
-            Ang = extLogo.__calcuAngle__(src_pts,dst_pts)
+            Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
             if np.isnan(Ang):
                 self._hasValidLogo = False
             else:
@@ -125,9 +123,9 @@ class Lego(object):
 
     def _get_rotated_image(self):
         if self._hasValidLogo:
-            imgH,imgW,_ = self._image.shape
+            imgH, imgW, _ = self._image.shape
             M = cv2.getRotationMatrix2D((imgW/2, imgH/2), self._rotate_angle, 1)
-            self._rotated_image = cv2.warpAffine(self._image,M,(imgW,imgH))
+            self._rotated_image = cv2.warpAffine(self._image, M, (imgW, imgH))
 
     def get_logo_box(self):
         if self._hasValidLogo:
