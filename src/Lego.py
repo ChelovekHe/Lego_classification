@@ -1,13 +1,24 @@
 # import the necessary packages
 import numpy as np
 import cv2
+import extLogo
 
 
 class Lego(object):
     def __init__(self, image):
+        self._pureLogo = cv2.imread('../fig/purelogo128.png')
         self._image = image
+
+        self._logo = None
+        self._logo_box = None
+        self._hasValidLogo = False
+
         self.logo_detect()
-        self.barcode_detect()
+        if self._hasValidLogo:
+            try:
+                self.get_rotate_angle()
+            except:
+                pass
 
     def logo_detect(self):
         image = self._image
@@ -32,7 +43,7 @@ class Lego(object):
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
-            if idx > 5:
+            if idx >= 5:
                 break
             # moment = cv2.moments(contour)
             area = cv2.contourArea(contour)
@@ -40,80 +51,81 @@ class Lego(object):
             if (np.sqrt(area) * 4 <= perimeter * 1.1) & (np.sqrt(area) * 4 >= perimeter * 0.9):
                 new_contours.append(contour)
 
-        cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
+        if len(new_contours) >= 1:
+            cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
 
-        # compute the rotated bounding box of the contour
-        rect = cv2.minAreaRect(cnt)
-        box = np.int0(cv2.boxPoints(rect))
+            # compute the rotated bounding box of the contour
+            rect = cv2.minAreaRect(cnt)
+            box = np.int0(cv2.boxPoints(rect))
 
-        # print(rect[2])
+            xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
+            yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
+            cropst = np.array([yaxis.min()-10, xaxis.min()-10])
+            croped = np.array([yaxis.max()+10, xaxis.max()+10])
 
-        if rect[2] < -1:
-            rotate_angle = rect[2] + 90
+            self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
+            self._logo_box = box
+
+            # when the detect logo is square set flag true
+            height, width, _ = self._logo.shape
+            if abs(height - width) < 0.1*np.mean([height,width]):
+                self._hasValidLogo = True
+
+
+
+    def get_rotate_angle(self):
+        akaze = cv2.AKAZE_create()
+
+        gray_image1 = cv2.cvtColor(self._pureLogo,cv2.COLOR_BGR2GRAY)
+        gray_image2 = cv2.cvtColor(self._logo,cv2.COLOR_BGR2GRAY)
+
+        kp1, des1 = akaze.detectAndCompute(gray_image1, None)
+        kp2, des2 = akaze.detectAndCompute(gray_image2, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+
+        matches = bf.knnMatch(des1, des2, k=2)
+
+        good_matches = []
+        for m,n in matches:
+            if m.distance < 0.7*n.distance:
+                good_matches.append(m)
+
+        MIN_MATCH_COUNT = 6
+        MAX_MATCH_COUNT = 12
+        if len(good_matches) >= MIN_MATCH_COUNT & len(good_matches) <= MAX_MATCH_COUNT :
+            src_pts = np.float64([ kp1[m.queryIdx].pt for m in good_matches ]).reshape(-1,1,2)
+            dst_pts = np.float64([ kp2[m.trainIdx].pt for m in good_matches ]).reshape(-1,1,2)
+
+            Ang = extLogo.__calcuAngle__(src_pts,dst_pts)
+            if np.isnan(Ang):
+                self._hasValidLogo = False
+            else:
+                Ang = Ang/np.pi*180
+
+            print(Ang)
+        # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
+        # cv2.imshow("AKAZE matching", im3)
+        # cv2.waitKey(0)
+
+    def get_logo_image(self):
+        if self._hasValidLogo:
+            return self._logo
         else:
-            rotate_angle = rect[2]
+            return None
 
-        # rotate the image
-        Point = cv2.getRotationMatrix2D(tuple(box[2]), rotate_angle, 1)
-        self._rot_img = cv2.warpAffine(image, Point, (cols, rows))
+    # def getRotatedImage(self):
+    #     return self._image
 
-        cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
+    def get_logo_box(self):
+        if self._hasValidLogo:
+            return self._logo_box
+        else:
+            return None
 
-        # todo still confusing about the coordination
-        cols_st = box[2][1]
-        cols_ed = cols_st + rect[1][1]
-        rows_st = box[2][0]
-        rows_ed = rows_st + rect[1][0]
-        # print([cols_st,cols_ed, rows_st,rows_ed])
-
-        self._logo = self._rot_img[cols_st:cols_ed, rows_st:rows_ed]
-        self._logo_box = box
-
-    def barcode_detect(self):
-        image = self._rot_img
-        # load the image and convert it to grayscale
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        sobelgx = cv2.Sobel(gray,cv2.CV_64F,1,0,ksize=3)
-        sobelgy = cv2.Sobel(gray,cv2.CV_64F,0,1,ksize=3)
-
-        # subtract the y-gradient from the x-gradient
-        gradient = sobelgx - sobelgy
-        # gradient = cv2.convertScaleAbs(gradient)
-
-        # blur and threshold the image
-        blurred = cv2.blur(gradient, (3, 3))
-        _,thresh = cv2.threshold(gradient, 225, 255, cv2.THRESH_BINARY)
-
-        # construct a closing kernel and apply it to the thresholded image
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
-        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-
-        # perform a series of erosions and dilations
-        closed = cv2.erode(closed, None, iterations=4)
-        closed = cv2.dilate(closed, None, iterations=4)
-
-        # find the contours in the thresholded image, then sort the contours
-        # by their area, keeping only the largest one
-        (_, contours, _) = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        c = sorted(contours, key=cv2.contourArea, reverse=True)[0]
-
-        # compute the rotated bounding box of the largest contour
-        rect = cv2.minAreaRect(c)
-        self._barcode_box = np.int0(cv2.boxPoints(rect))
-
-        cv2.imshow("I1", gradient)
-        # cv2.imshow("I2",gradient2)
-        cv2.waitKey(0)
-
-    def getLogoImage(self):
-        return self._logo
-
-    def getRotatedImage(self):
-        return self._rot_img
-
-    def getLogoBox(self):
-        return self._logo_box
-
-    def getBarcodeBox(self):
-        return self._barcode_box
+    # def getBarcodeBox(self):
+    #     if hasattr(self, '_barcode_box'):
+    #         return self._barcode_box
+    #     else:
+    #         return None
+    #         print('No barcode detected')
