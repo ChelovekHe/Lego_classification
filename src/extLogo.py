@@ -44,11 +44,14 @@ def extLegoLogo(img):
     # # compute the rotated bounding box of the contour
     rect = cv2.minAreaRect(logoContour)
     box = np.int0(cv2.boxPoints(rect))
+
     xaxis = np.array([box[0,0],box[1,0],box[2,0],box[3,0]])
     yaxis = np.array([box[0,1],box[1,1],box[2,1],box[3,1]])
     cropst = np.array([yaxis.min()-10,xaxis.min()-10])
-    croped = np.array([yaxis.max()+10,xaxis.max()+10])
+    croped = np.array([yaxis.max(),xaxis.max()+10])
+
     crop = img[cropst[0]:croped[0],cropst[1]:croped[1]]
+
     mask = np.zeros([imgH,imgW]).astype('uint8')
     mask[cropst[0]:croped[0],cropst[1]:croped[1]] = 255
     H,W,_=crop.shape

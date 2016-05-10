@@ -6,22 +6,27 @@ import extLogo
 
 class Lego(object):
     def __init__(self, image):
+        # initialize attributes
         self._pureLogo = cv2.imread('../fig/purelogo128.png')
         self._image = image
-
+        self._rotated_image = None
+        self._rotate_angle = None
+        self._information = None
         self._logo = None
         self._logo_box = None
         self._hasValidLogo = False
 
-        self.logo_detect()
+        self._logo_detect(image)
         if self._hasValidLogo:
             try:
-                self.get_rotate_angle()
+                self._get_rotate_angle()
+                self._get_rotated_image()
             except:
                 pass
 
-    def logo_detect(self):
-        image = self._image
+    def _logo_detect(self,image):
+        self._hasValidLogo = False
+
         rows, cols, _ = image.shape
 
         # Convert BGR to HSV
@@ -48,7 +53,7 @@ class Lego(object):
             # moment = cv2.moments(contour)
             area = cv2.contourArea(contour)
             perimeter = cv2.arcLength(contour, True)
-            if (np.sqrt(area) * 4 <= perimeter * 1.1) & (np.sqrt(area) * 4 >= perimeter * 0.9):
+            if (np.sqrt(area) * 4 <= perimeter * 1.2) & (np.sqrt(area) * 4 >= perimeter * 0.8):
                 new_contours.append(contour)
 
         if len(new_contours) >= 1:
@@ -66,14 +71,14 @@ class Lego(object):
             self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
             self._logo_box = box
 
-            # when the detect logo is square set flag true
+            # when the detect logo is square, set flag true
             height, width, _ = self._logo.shape
             if abs(height - width) < 0.1*np.mean([height,width]):
                 self._hasValidLogo = True
 
 
 
-    def get_rotate_angle(self):
+    def _get_rotate_angle(self):
         akaze = cv2.AKAZE_create()
 
         gray_image1 = cv2.cvtColor(self._pureLogo,cv2.COLOR_BGR2GRAY)
@@ -92,7 +97,7 @@ class Lego(object):
                 good_matches.append(m)
 
         MIN_MATCH_COUNT = 6
-        MAX_MATCH_COUNT = 12
+        MAX_MATCH_COUNT = 10
         if len(good_matches) >= MIN_MATCH_COUNT & len(good_matches) <= MAX_MATCH_COUNT :
             src_pts = np.float64([ kp1[m.queryIdx].pt for m in good_matches ]).reshape(-1,1,2)
             dst_pts = np.float64([ kp2[m.trainIdx].pt for m in good_matches ]).reshape(-1,1,2)
@@ -101,25 +106,38 @@ class Lego(object):
             if np.isnan(Ang):
                 self._hasValidLogo = False
             else:
-                Ang = Ang/np.pi*180
+                self._rotate_angle = Ang/np.pi*180
 
-            print(Ang)
         # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
         # cv2.imshow("AKAZE matching", im3)
         # cv2.waitKey(0)
 
-    def get_logo_image(self):
-        if self._hasValidLogo:
-            return self._logo
-        else:
-            return None
+    def get_information_part(self):
+        self._logo_detect(self._rotated_image)
+        height, _, _ = self._logo.shape
+        box = self._logo_box
+        xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
+        yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
+        cropst = np.array([yaxis.min()-10, xaxis.min()-10])
+        croped = np.array([yaxis.max()+height+10, xaxis.max()+10])
 
-    # def getRotatedImage(self):
-    #     return self._image
+        self._information = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
+
+    def _get_rotated_image(self):
+        if self._hasValidLogo:
+            imgH,imgW,_ = self._image.shape
+            M = cv2.getRotationMatrix2D((imgW/2, imgH/2), self._rotate_angle, 1)
+            self._rotated_image = cv2.warpAffine(self._image,M,(imgW,imgH))
 
     def get_logo_box(self):
         if self._hasValidLogo:
             return self._logo_box
+        else:
+            return None
+
+    def get_logo_image(self):
+        if self._hasValidLogo:
+            return self._logo
         else:
             return None
 

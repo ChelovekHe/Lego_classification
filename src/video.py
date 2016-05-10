@@ -18,6 +18,13 @@ while 1:
 
     cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
 
+    try:
+        l.get_information_part()
+        cv2.imshow('info', l._information)
+    except:
+        pass
+
+
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break
