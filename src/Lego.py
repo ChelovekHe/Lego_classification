@@ -116,10 +116,14 @@ class Lego(object):
         box = self._logo_box
         xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
         yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
-        cropst = np.array([yaxis.min()-10, xaxis.min()-10])
+        cropst = np.array([yaxis.max(), xaxis.min()-10])
         croped = np.array([yaxis.max()+height+10, xaxis.max()+10])
 
-        self._information = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
+        img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
+
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, threshold_image = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+        self._information = threshold_image
 
     def _get_rotated_image(self):
         if self._hasValidLogo:
