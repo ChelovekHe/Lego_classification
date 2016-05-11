@@ -50,7 +50,7 @@ class Lego(object):
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
-            if idx >= 20:
+            if idx >= 5:
                 break
             # moment = cv2.moments(contour)
             area = cv2.contourArea(contour)
@@ -73,10 +73,7 @@ class Lego(object):
             self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
             self._logo_box = box
 
-            # when the detect logo is square, set flag true
-            height, width, _ = self._logo.shape
-            if abs(height - width) < 0.1*np.mean([height, width]):
-                self._hasValidLogo = True
+            self._hasValidLogo = True
 
     def _get_rotate_angle(self):
         akaze = cv2.AKAZE_create()
@@ -93,7 +90,7 @@ class Lego(object):
 
         good_matches = []
         for m, n in matches:
-            if m.distance < 0.5*n.distance:
+            if m.distance < 0.7*n.distance:
                 good_matches.append(m)
 
 
