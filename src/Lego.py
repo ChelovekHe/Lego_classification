@@ -7,7 +7,7 @@ import extLogo
 class Lego(object):
     def __init__(self, image):
         # initialize attributes
-        self._pureLogo = cv2.imread('../fig/purelogo128.png')
+        self._pureLogo = cv2.imread('../fig/purelogo256.png')
         self._image = image
         self._rotated_image = None
         self._rotate_angle = None
@@ -15,6 +15,8 @@ class Lego(object):
         self._logo = None
         self._logo_box = None
         self._hasValidLogo = False
+        self.MIN_MATCH_COUNT = 6
+        self.MAX_MATCH_COUNT = 10
 
         self._logo_detect(image)
         if self._hasValidLogo:
@@ -48,7 +50,7 @@ class Lego(object):
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
-            if idx >= 5:
+            if idx >= 20:
                 break
             # moment = cv2.moments(contour)
             area = cv2.contourArea(contour)
@@ -91,12 +93,11 @@ class Lego(object):
 
         good_matches = []
         for m, n in matches:
-            if m.distance < 0.7*n.distance:
+            if m.distance < 0.5*n.distance:
                 good_matches.append(m)
 
-        MIN_MATCH_COUNT = 6
-        MAX_MATCH_COUNT = 10
-        if len(good_matches) >= MIN_MATCH_COUNT & len(good_matches) <= MAX_MATCH_COUNT:
+
+        if len(good_matches) >= self.MIN_MATCH_COUNT & len(good_matches) <= self.MAX_MATCH_COUNT:
             src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
             dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 

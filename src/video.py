@@ -23,16 +23,16 @@ while 1:
     try:
         l.get_information_part()
         cv2.imshow('info', l._information)
-        cv2.imwrite('info.jpg',l._information)
-        img = Image.open('info.jpg')
-        tr = Tesseract(datadir='../tessdata', lang='eng')
-        text = tr.ocr_image(img)
-        print(text)
+        # cv2.imwrite('info.jpg',l._information)
+        # img = Image.open('info.jpg')
+        # tr = Tesseract(datadir='../tessdata', lang='eng')
+        # text = tr.ocr_image(img)
+        # print(text)
     except:
         pass
 
 
-    # cv2.imshow('frame', frame)
+    cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break
 cap.release()
