@@ -26,6 +26,7 @@ class Lego(object):
         self._has_valid_logo = False
         self._has_information = False
 
+        #the main part of the algorithm
         self._logo_detect(image)
         self._get_rotate_angle()
         self._get_rotated_image()

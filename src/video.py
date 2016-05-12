@@ -30,6 +30,8 @@ while 1:
 
     if l._has_information:
         cv2.imshow('info', info)
+    # if l._has_rotated_image:
+    #     cv2.imshow('rotate', l._rotated_image)
     # if l._has_potential_logo:
     #     cv2.imshow('logo', l.get_logo_image())
 
