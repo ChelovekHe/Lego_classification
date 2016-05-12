@@ -17,7 +17,7 @@ class Lego(object):
 
         # Parameters
         self.MIN_MATCH_COUNT = 6
-        self.MAX_MATCH_COUNT = 12
+        self.MAX_MATCH_COUNT = 10
 
         # Flags
         self._has_rotated_image = False
@@ -54,27 +54,33 @@ class Lego(object):
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
+            # only take the first five of the contours
             if idx >= 5:
                 break
-            # moment = cv2.moments(contour)
+            # generate the area of the found contour
             area = cv2.contourArea(contour)
+            # the perimeter
             perimeter = cv2.arcLength(contour, True)
+            # check if the contour is a square by formula below:
             if (np.sqrt(area) * 4 <= perimeter * 1.2) & (np.sqrt(area) * 4 >= perimeter * 0.8):
                 new_contours.append(contour)
 
         if len(new_contours) >= 1:
+            # take the biggest suitable contour
             cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
 
             # compute the rotated bounding box of the contour
             rect = cv2.minAreaRect(cnt)
             box = np.int0(cv2.boxPoints(rect))
+            ylimit, xlimit, _ = self._image.shape
 
             xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
             yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
             cropst = np.array([yaxis.min()-10, xaxis.min()-10])
             croped = np.array([yaxis.max()+10, xaxis.max()+10])
 
-            if (cropst[0]>0) & (cropst[1]>0):
+            if (cropst[0]>0) & (cropst[1]>0) & (croped[0]<ylimit) & (croped[1]<xlimit):
+                # crop the logo area around the logo box
                 self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
                 self._logo_box = box
                 self._has_potential_logo = True
@@ -103,12 +109,14 @@ class Lego(object):
             except:
                 pass
 
-
+            # the keypoints matched within certain ranges.
             if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
                 src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
                 dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
+                # calculate the rotate angles
                 Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
+                # check if there is a angle(if the potential logo is a valid lego logo )
                 if np.isnan(Ang):
                     self._has_valid_logo = False
                 else:
@@ -116,19 +124,19 @@ class Lego(object):
                     self._has_rotate_angle = True
                     self._has_valid_logo = True
 
-
-            # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
-            # cv2.imshow("AKAZE matching", im3)
-            # cv2.waitKey(0)
+                    # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
+                    # cv2.imshow("AKAZE matching", im3)
+                    # cv2.waitKey(0)
 
     def _get_information(self):
         if self._has_valid_logo & self._has_rotated_image:
+            ylimit, xlimit, _ = self._image.shape
             height, weight, _ = self._logo.shape
 
-            cropst = np.array([self._logo_center_x-weight/2-10, self._logo_center_y+height/2])
-            croped = np.array([self._logo_center_x+weight/2+10, self._logo_center_y+height+height/2+10])
+            cropst = np.array([self._logo_center_y+height/2, self._logo_center_x-weight/2])
+            croped = np.array([self._logo_center_y+height, self._logo_center_x+weight/2])
 
-            if (cropst[0]>0) & (cropst[1]>0):
+            if (cropst[0]>0) & (cropst[1]>0) & (croped[0]<ylimit) & (croped[1]<xlimit):
                 img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
 
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -142,6 +150,8 @@ class Lego(object):
             box = self._logo_box
             xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
             yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
+
+            # calculate the center of the lego logo
             self._logo_center_x = int(round(np.mean(xaxis),0))
             self._logo_center_y = int(round(np.mean(yaxis),0))
             M = cv2.getRotationMatrix2D((self._logo_center_x, self._logo_center_y), self._rotate_angle, 1)
@@ -162,10 +172,3 @@ class Lego(object):
         if self._has_information:
             return self._information
 
-
-    # def getBarcodeBox(self):
-    #     if hasattr(self, '_barcode_box'):
-    #         return self._barcode_box
-    #     else:
-    #         return None
-    #         print('No barcode detected')
