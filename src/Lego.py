@@ -11,13 +11,13 @@ class Lego(object):
         self._image = image
         self._rotated_image = None
         self._rotate_angle = None
-        self._information = None
-        self._logo = None
+        self._information = np.zeros([100,100,3],dtype=np.uint8)
+        self._logo = np.zeros([100,100,3],dtype=np.uint8)
         self._logo_box = None
 
         # Parameters
         self.MIN_MATCH_COUNT = 6
-        self.MAX_MATCH_COUNT = 10
+        self.MAX_MATCH_COUNT = 12
 
         # Flags
         self._has_rotated_image = False
@@ -27,11 +27,9 @@ class Lego(object):
         self._has_information = False
 
         self._logo_detect(image)
-        if self._has_potential_logo:
-            self._get_rotate_angle()
-            if self._has_valid_logo:
-                self._get_rotated_image()
-                self._get_information()
+        self._get_rotate_angle()
+        self._get_rotated_image()
+        self._get_information()
 
     def _logo_detect(self,image):
         rows, cols, _ = image.shape
@@ -75,13 +73,13 @@ class Lego(object):
             cropst = np.array([yaxis.min()-10, xaxis.min()-10])
             croped = np.array([yaxis.max()+10, xaxis.max()+10])
 
-            self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
-            self._logo_box = box
-
-            self._has_potential_logo = True
+            if (cropst[0]>0) & (cropst[1]>0):
+                self._logo = self._image[cropst[0]:croped[0], cropst[1]:croped[1]]
+                self._logo_box = box
+                self._has_potential_logo = True
 
     def _get_rotate_angle(self):
-        if self._logo != None:
+        if self._has_potential_logo:
             akaze = cv2.AKAZE_create()
 
             gray_image1 = cv2.cvtColor(self._pureLogo, cv2.COLOR_BGR2GRAY)
@@ -97,10 +95,12 @@ class Lego(object):
                 matches = []
 
             good_matches = []
-            if len(matches) > 2:
+            try:
                 for m, n in matches:
                     if m.distance < 0.7*n.distance:
                         good_matches.append(m)
+            except:
+                pass
 
 
             if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
@@ -115,6 +115,7 @@ class Lego(object):
                     self._has_rotate_angle = True
                     self._has_valid_logo = True
 
+
             # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
             # cv2.imshow("AKAZE matching", im3)
             # cv2.waitKey(0)
@@ -126,15 +127,16 @@ class Lego(object):
             cropst = np.array([self._logo_center_x-weight/2-10, self._logo_center_y+height/2])
             croped = np.array([self._logo_center_x+weight/2+10, self._logo_center_y+height+height/2+10])
 
-            img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
+            if (cropst[0]>0) & (cropst[1]>0):
+                img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
 
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            _, threshold_image = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-            self._information = threshold_image
-            self._has_information = True
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                _, threshold_image = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+                self._information = threshold_image
+                self._has_information = True
 
     def _get_rotated_image(self):
-        if self._has_rotate_angle:
+        if self._has_valid_logo & self._has_rotate_angle:
             imgH, imgW, _ = self._image.shape
             box = self._logo_box
             xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
@@ -154,14 +156,11 @@ class Lego(object):
     def get_logo_image(self):
         if self._has_valid_logo:
             return self._logo
-        else:
-            return None
 
     def get_information_part(self):
         if self._has_information:
             return self._information
-        else:
-            return None
+
 
     # def getBarcodeBox(self):
     #     if hasattr(self, '_barcode_box'):

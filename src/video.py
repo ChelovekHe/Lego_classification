@@ -30,6 +30,10 @@ while 1:
 
     if l._has_information:
         cv2.imshow('info', info)
+    # if l._has_potential_logo:
+    #     cv2.imshow('logo', l.get_logo_image())
+
+    # print(l._logo.shape)
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break
