@@ -27,9 +27,9 @@ while 1:
         # text = tr.ocr_image(img)
         # print(text)
 
-    # cv2.imshow('info', info)
-    if l._has_rotated_image:
-        cv2.imshow('rotate', l._rotated_image)
+
+    if l._has_information:
+        cv2.imshow('info', info)
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break

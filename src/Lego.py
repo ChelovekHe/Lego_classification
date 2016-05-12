@@ -31,7 +31,7 @@ class Lego(object):
             self._get_rotate_angle()
             if self._has_valid_logo:
                 self._get_rotated_image()
-            # self._get_information()
+                self._get_information()
 
     def _logo_detect(self,image):
         rows, cols, _ = image.shape
@@ -81,52 +81,50 @@ class Lego(object):
             self._has_potential_logo = True
 
     def _get_rotate_angle(self):
-        akaze = cv2.AKAZE_create()
+        if self._logo != None:
+            akaze = cv2.AKAZE_create()
 
-        gray_image1 = cv2.cvtColor(self._pureLogo, cv2.COLOR_BGR2GRAY)
-        gray_image2 = cv2.cvtColor(self._logo, cv2.COLOR_BGR2GRAY)
+            gray_image1 = cv2.cvtColor(self._pureLogo, cv2.COLOR_BGR2GRAY)
+            gray_image2 = cv2.cvtColor(self._logo, cv2.COLOR_BGR2GRAY)
 
-        kp1, des1 = akaze.detectAndCompute(gray_image1, None)
-        kp2, des2 = akaze.detectAndCompute(gray_image2, None)
+            kp1, des1 = akaze.detectAndCompute(gray_image1, None)
+            kp2, des2 = akaze.detectAndCompute(gray_image2, None)
 
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
-        if des2 != None:
-            matches = bf.knnMatch(des1, des2, k=2)
-        else:
-            matches = []
-
-        good_matches = []
-        if len(matches) > 1:
-            for m, n in matches:
-                if m.distance < 0.7*n.distance:
-                    good_matches.append(m)
-
-
-        if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
-            src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
-            dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
-
-            Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
-            if np.isnan(Ang):
-                self._has_valid_logo = False
+            bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+            if des2 != None:
+                matches = bf.knnMatch(des1, des2, k=2)
             else:
-                self._rotate_angle = Ang/np.pi*180
-                self._has_rotate_angle = True
-                self._has_valid_logo = True
+                matches = []
 
-        # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
-        # cv2.imshow("AKAZE matching", im3)
-        # cv2.waitKey(0)
+            good_matches = []
+            if len(matches) > 2:
+                for m, n in matches:
+                    if m.distance < 0.7*n.distance:
+                        good_matches.append(m)
+
+
+            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
+                src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+                dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+
+                Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
+                if np.isnan(Ang):
+                    self._has_valid_logo = False
+                else:
+                    self._rotate_angle = Ang/np.pi*180
+                    self._has_rotate_angle = True
+                    self._has_valid_logo = True
+
+            # im3 = cv2.drawMatchesKnn(self._pureLogo, kp1, self._logo, kp2, good_matches, None, flags=2)
+            # cv2.imshow("AKAZE matching", im3)
+            # cv2.waitKey(0)
 
     def _get_information(self):
-        self._logo_detect(self._rotated_image)
         if self._has_valid_logo & self._has_rotated_image:
-            height, _, _ = self._logo.shape
-            box = self._logo_box
-            xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
-            yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
-            cropst = np.array([box[0, 0], xaxis.min()-10])
-            croped = np.array([yaxis.max()+height+10, xaxis.max()+10])
+            height, weight, _ = self._logo.shape
+
+            cropst = np.array([self._logo_center_x-weight/2-10, self._logo_center_y+height/2])
+            croped = np.array([self._logo_center_x+weight/2+10, self._logo_center_y+height+height/2+10])
 
             img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
 
@@ -141,9 +139,9 @@ class Lego(object):
             box = self._logo_box
             xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
             yaxis = np.array([box[0, 1], box[1, 1], box[2, 1], box[3, 1]])
-            center_x = int(round(np.mean(xaxis),0))
-            center_y = int(round(np.mean(yaxis),0))
-            M = cv2.getRotationMatrix2D((center_x, center_y), self._rotate_angle, 1)
+            self._logo_center_x = int(round(np.mean(xaxis),0))
+            self._logo_center_y = int(round(np.mean(yaxis),0))
+            M = cv2.getRotationMatrix2D((self._logo_center_x, self._logo_center_y), self._rotate_angle, 1)
             self._rotated_image = cv2.warpAffine(self._image, M, (imgW, imgH))
             self._has_rotated_image = True
 
