@@ -17,21 +17,19 @@ while 1:
 
     l = Lego(frame)
     logo_box = l.get_logo_box()
+    info = l.get_information_part()
 
     cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
 
-    try:
-        l.get_information_part()
-        cv2.imshow('info', l._information)
-        # cv2.imwrite('info.jpg',l._information)
+        # cv2.imwrite('info.jpg',info)
         # img = Image.open('info.jpg')
         # tr = Tesseract(datadir='../tessdata', lang='eng')
         # text = tr.ocr_image(img)
         # print(text)
-    except:
-        pass
 
-
+    # cv2.imshow('info', info)
+    if l._has_rotated_image:
+        cv2.imshow('rotate', l._rotated_image)
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break

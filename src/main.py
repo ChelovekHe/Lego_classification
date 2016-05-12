@@ -12,7 +12,7 @@ p2 = os.listdir('../fig/' + p1[3] + '/')
 
 # load the image and convert it to grayscale
 image = cv2.imread('../fig/' + p1[3] + '/' + p2[1])
-image = cv2.imread('/Users/harrysocool/Github/package_identification/fig/1.pic_hd.jpg')
+# image = cv2.imread('/Users/harrysocool/Github/package_identification/fig/1.pic_hd.jpg')
 image = cv2.resize(image, (0, 0), fx=0.1, fy=0.1)
 
 l = Lego(image)
@@ -28,9 +28,11 @@ logo_box = l.get_logo_box()
 # image
 cv2.drawContours(image, [logo_box], -1, (0, 255, 0), 2)
 
-cv2.imshow("Image1", image)
-cv2.imshow("Image2", logo_image)
-
+try:
+    cv2.imshow("Image1", image)
+    cv2.imshow("Image2", l._rotated_image)
+except:
+    pass
 # img = Image.open('/Users/harrysocool/Github/package_identification/fig/1.png')
 # tr = Tesseract(datadir='../tessdata', lang='eng')
 # text = tr.ocr_image(img)
