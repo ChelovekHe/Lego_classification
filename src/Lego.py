@@ -6,6 +6,7 @@ import extLogo
 
 class Lego(object):
     def __init__(self, image):
+        print
         # initialize attributes
         self._pureLogo = cv2.imread('../fig/purelogo256.png')
         self._image = image
