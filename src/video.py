@@ -21,15 +21,13 @@ while 1:
 
     cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
 
-        # cv2.imwrite('info.jpg',info)
-        # img = Image.open('info.jpg')
-        # tr = Tesseract(datadir='../tessdata', lang='eng')
-        # text = tr.ocr_image(img)
-        # print(text)
-
-
     if l._has_information:
         cv2.imshow('info', info)
+        cv2.imwrite('info.jpg',info)
+        img = Image.open('info.jpg')
+        tr = Tesseract(datadir='../tessdata', lang='eng')
+        text = tr.ocr_image(img)
+        print(text)
     # if l._has_rotated_image:
     #     img = l._rotated_image
     #     img[l._logo_center_y:l._logo_center_y+3, l._logo_center_x:l._logo_center_x+3, :] = [255, 255, 255]
@@ -37,9 +35,6 @@ while 1:
     # if l._has_potential_logo:
     #     cv2.imshow('logo', l.get_logo_image())
 
-    # print(l._logo.shape)
-    # if l._has_rotate_angle:
-    #     frame[l._logo_center_y:l._logo_center_y+3, l._logo_center_x:l._logo_center_x+3, :] = [255, 255, 255]
     cv2.imshow('frame', frame)
     if cv2.waitKey(1) & 0xFF == 27:
         break

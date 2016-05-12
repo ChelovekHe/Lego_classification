@@ -16,8 +16,8 @@ class Lego(object):
         self._logo_box = None
 
         # Parameters
-        self.MIN_MATCH_COUNT = 6
-        self.MAX_MATCH_COUNT = 10
+        self.MIN_MATCH_COUNT = 4
+        self.MAX_MATCH_COUNT = 30
 
         # Flags
         self._has_rotated_image = False
@@ -48,9 +48,9 @@ class Lego(object):
         # Threshold the HSV image to get only red colors
         mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
         mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-        mask = mask1 + mask2
+        self._mask = mask1 + mask2
 
-        _, contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        _, contours, _ = cv2.findContours(self._mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
@@ -109,7 +109,7 @@ class Lego(object):
             except:
                 pass
 
-            # the keypoints matched within certain ranges.
+            # the key-points matched within certain ranges.
             if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
                 src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
                 dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
@@ -134,14 +134,16 @@ class Lego(object):
             height, weight, _ = self._logo.shape
 
             cropst = np.array([self._logo_center_y+height/2, self._logo_center_x-weight/2])
-            croped = np.array([self._logo_center_y+height, self._logo_center_x+weight/2])
+            croped = np.array([self._logo_center_y+height+height/2, self._logo_center_x+weight/2])
 
             if (cropst[0]>0) & (cropst[1]>0) & (croped[0]<ylimit) & (croped[1]<xlimit):
                 img = self._rotated_image[cropst[0]:croped[0], cropst[1]:croped[1]]
 
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                _, threshold_image = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-                self._information = threshold_image
+                _, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+                kernel = np.ones((2,2),np.uint8)
+                thresh = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE,kernel, iterations = 2)
+                self._information = thresh
                 self._has_information = True
 
     def _get_rotated_image(self):
@@ -159,7 +161,7 @@ class Lego(object):
             self._has_rotated_image = True
 
     def get_logo_box(self):
-        if self._has_valid_logo:
+        if self._has_potential_logo:
             return self._logo_box
         else:
             return None
