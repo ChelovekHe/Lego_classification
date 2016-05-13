@@ -1,5 +1,5 @@
 
-Packaging identification
+Packaging Identification
 =======
 ### Brief Aim : Select the correct product package from a pre-loaded list of sample assets using a mobile phone camera.
  
