@@ -20,33 +20,37 @@ def ocr(info):
     return text
 
 
-def compare(image):
-    li = Lego(image)
-    rotated = li.get_logo_image()
-    print(type(rotated))
-    lyu = LogoAffinePos(li._pureLogo, featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(),
+def initial_class():
+    imgPATH = '../fig/'
+    logoTp = cv2.imread(imgPATH + 'purelogo256.png')
+    lyu = LogoAffinePos(logoTp, featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(),
                         matchMethod='knnMatch')
-    try:
-        logoContourPts, cPts, affinedcPts, affinedImg, rtnFlag = lyu.rcvAffinedAll(image)
-        cv2.drawContours(image, [logoContourPts], -1, (0,255,0), 2)
-        if (rtnFlag is True):
-            image = affinedImg
-    except:
-        pass
-    return rotated, image
+    return lyu
+
+
+def get_affined_image(l, image):
+    logoContourPts, cPts, affinedcPts, affinedImg, rtnFlag = lyu.rcvAffinedAll(image)
+    cv2.drawContours(image, [logoContourPts], -1, (0, 255, 0), 2)
+    if (rtnFlag is True):
+        image = affinedImg
+    return image
+
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
+    lyu = initial_class()
     while 1:
         _, frame = cap.read()
 
-        # info = l.get_information_part()
+        affined = get_affined_image(lyu, frame)
+
+        li = Lego(frame)
+        rotated = li.get_rotated_image()
+        # info = li.get_information_part()
         # text = ocr(info)
 
-        rotated, affined = compare(frame)
-
-        # rotated = resize(rotated, 0.5)
-        # cv2.imshow('rotate', rotated)
+        rotated = resize(rotated, 0.5)
+        cv2.imshow('rotate', rotated)
 
         affined = resize(affined, 0.5)
         cv2.imshow('frame', affined)

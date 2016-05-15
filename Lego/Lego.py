@@ -27,16 +27,16 @@ class Lego(object):
         self._has_information = False
 
         #the main part of the algorithm
-        self._logo_detect(image)
+        self._logo_detect()
         self._get_rotate_angle()
         self._get_rotated_image()
         self._get_information()
 
-    def _logo_detect(self,image):
-        rows, cols, _ = image.shape
+    def _logo_detect(self):
+        rows, cols, _ = self._image.shape
 
         # Convert BGR to HSV
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(self._image, cv2.COLOR_BGR2HSV)
 
         # define range of red color in HSV
         lower_red1 = np.array([0, 50, 50])
@@ -119,7 +119,7 @@ class Lego(object):
                 Ang = lyu.__calcuAngle__(src_pts, dst_pts)
                 # check if there is a angle(if the potential logo is a valid lego logo )
                 if np.isnan(Ang):
-                    self._has_valid_logo = False
+                    self._has_valid_logo =False
                 else:
                     self._rotate_angle = Ang/np.pi*180
                     self._has_rotate_angle = True
@@ -176,5 +176,4 @@ class Lego(object):
             return self._information
 
     def get_rotated_image(self):
-        if self._has_rotated_image:
-            return self._image
+        return self._rotated_image

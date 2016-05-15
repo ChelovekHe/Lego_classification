@@ -7,11 +7,7 @@ if __name__ == '__main__':
     # logoAffinePos = imgPreprocessing.LogoAffinePos(logoTp)
     logoAffinePos = imgPreprocessing.LogoAffinePos(logoTp,featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(), \
                                                     matchMethod = 'knnMatch')
-    VWIDTH = 960
-    VHIGH = 540
     cap = cv2.VideoCapture(0)
-    ret = cap.set(3,VWIDTH)
-    ret = cap.set(4,VHIGH)
     ret,img = cap.read()
     while(1):
         ret,imgRes = cap.read()

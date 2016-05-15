@@ -205,8 +205,8 @@ class LogoAffinePos(object):
     def rcvAffinedAll(self,img):
         imggray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         imgH,imgW = imggray.shape
-#         [logoContourPts, _, cPts, rtnFlag] = self.extLegoLogo(img)
-        [logoContourPts, _, cPts, rtnFlag] = self.extLegoLogo(img, minArea=7000)
+        [logoContourPts, _, cPts, rtnFlag] = self.extLegoLogo(img)
+#         [logoContourPts, _, cPts, rtnFlag] = self.extLegoLogo(img, minArea=7000)
         if(rtnFlag is False):
             return logoContourPts, cPts, None, None, False
         else:
