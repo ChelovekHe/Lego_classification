@@ -1,7 +1,7 @@
 # import the necessary packages
 import numpy as np
 import cv2
-import extLogo
+import imgPreprocessing
 
 
 class Lego(object):
@@ -9,14 +9,14 @@ class Lego(object):
         # initialize attributes
         self._pureLogo = cv2.imread('../fig/purelogo256.png')
         self._image = image
-        self._rotated_image = None
+        self._rotated_image = image
         self._rotate_angle = None
         self._information = np.zeros([100,100,3],dtype=np.uint8)
         self._logo = np.zeros([100,100,3],dtype=np.uint8)
         self._logo_box = None
 
         # Parameters
-        self.MIN_MATCH_COUNT = 4
+        self.MIN_MATCH_COUNT = 6
         self.MAX_MATCH_COUNT = 30
 
         # Flags
@@ -65,7 +65,7 @@ class Lego(object):
             if (np.sqrt(area) * 4 <= perimeter * 1.2) & (np.sqrt(area) * 4 >= perimeter * 0.8):
                 new_contours.append(contour)
 
-        if len(new_contours) >= 1:
+        if (len(new_contours) >= 1):
             # take the biggest suitable contour
             cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
 
@@ -96,7 +96,7 @@ class Lego(object):
             kp2, des2 = akaze.detectAndCompute(gray_image2, None)
 
             bf = cv2.BFMatcher(cv2.NORM_HAMMING)
-            if des2 != None:
+            if des2 is not None:
                 matches = bf.knnMatch(des1, des2, k=2)
             else:
                 matches = []
@@ -110,12 +110,13 @@ class Lego(object):
                 pass
 
             # the key-points matched within certain ranges.
-            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
+            if (len(good_matches) >= self.MIN_MATCH_COUNT):
                 src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
                 dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
                 # calculate the rotate angles
-                Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
+                lyu = imgPreprocessing.LogoAffinePos(self._pureLogo)
+                Ang = lyu.__calcuAngle__(src_pts, dst_pts)
                 # check if there is a angle(if the potential logo is a valid lego logo )
                 if np.isnan(Ang):
                     self._has_valid_logo = False
@@ -147,7 +148,7 @@ class Lego(object):
                 self._has_information = True
 
     def _get_rotated_image(self):
-        if self._has_valid_logo & self._has_rotate_angle:
+        if self._has_rotate_angle:
             imgH, imgW, _ = self._image.shape
             box = self._logo_box
             xaxis = np.array([box[0, 0], box[1, 0], box[2, 0], box[3, 0]])
@@ -174,3 +175,6 @@ class Lego(object):
         if self._has_information:
             return self._information
 
+    def get_rotated_image(self):
+        if self._has_rotated_image:
+            return self._image
