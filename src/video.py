@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from lib import Lego, imgPreprocessing
+from Lego import Lego, imgPreprocessing
 from PIL import Image
 from tesserwrap import Tesseract
 
