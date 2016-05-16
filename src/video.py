@@ -20,40 +20,53 @@ def ocr(info):
     return text
 
 
-def initial_class():
+def initial_lyu_class():
     imgPATH = '../fig/'
     logoTp = cv2.imread(imgPATH + 'purelogo256.png')
     lyu = LogoAffinePos(logoTp, featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(),
                         matchMethod='knnMatch')
     return lyu
 
+def initial_li_class(image):
+     li = Lego(image)
+     return li
 
-def get_affined_image(l, image):
+def get_affined_image(lyu, image):
     logoContourPts, cPts, affinedcPts, affinedImg, rtnFlag = lyu.rcvAffinedAll(image)
     cv2.drawContours(image, [logoContourPts], -1, (0, 255, 0), 2)
     if (rtnFlag is True):
-        image = affinedImg
-    return image
+        affined = affinedImg
+        affined = resize(affined, 0.3)
+        cv2.imshow('affined', affined)
+        cv2.moveWindow('affined',int(1280*0.35),int(720*0.35))
+
+def get_rotated_image(li):
+    if li._has_rotated_image:
+        rotated = li.get_rotated_image()
+        rotated = resize(rotated, 0.3)
+        cv2.imshow('rotate', rotated)
+        cv2.moveWindow('rotate',int(1280*0.35),0)
 
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
-    lyu = initial_class()
+    lyu = initial_lyu_class()
     while 1:
         _, frame = cap.read()
 
-        affined = get_affined_image(lyu, frame)
-
-        li = Lego(frame)
-        rotated = li.get_rotated_image()
+        li = initial_li_class(frame.copy())
+        get_rotated_image(li)
         # info = li.get_information_part()
         # text = ocr(info)
+        try:
+            get_affined_image(lyu, frame.copy())
+        except:
+            pass
 
-        rotated = resize(rotated, 0.5)
-        cv2.imshow('rotate', rotated)
-
-        affined = resize(affined, 0.5)
-        cv2.imshow('frame', affined)
+        logo_box = li.get_logo_box()
+        cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
+        frame = resize(frame, 0.3)
+        cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == 27:
             break
     cap.release()

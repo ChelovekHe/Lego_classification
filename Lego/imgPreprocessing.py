@@ -58,6 +58,7 @@ class LogoAffinePos(object):
         logoContour = np.zeros([imgH,imgW],'uint8')
         cv2.drawContours(logoContour, [logoContourPts], -1, 255, 3)
 
+        # print(type(logoContourPts))
         # corner points area
         cPtsAreaRtn = cv2.cornerHarris(logoContour.copy().astype('float32'),int(estLength/5),15,0.04)
         cPtsAreaRtn = cv2.dilate(cPtsAreaRtn, None)
