@@ -1,7 +1,13 @@
+""" This is a class for axtract the position and image out of the Lego box,
+    based on the Lego logo parts.
+
+    Author:  Li Sun & Lyu Yaopengfei
+    Date: 16-May-2016
+"""
 # import the necessary packages
 import numpy as np
 import cv2
-import extLogo
+import imgPreprocessing
 
 
 class Lego(object):
@@ -9,15 +15,15 @@ class Lego(object):
         # initialize attributes
         self._pureLogo = cv2.imread('../fig/purelogo256.png')
         self._image = image
-        self._rotated_image = None
+        self._rotated_image = image
         self._rotate_angle = None
         self._information = np.zeros([100,100,3],dtype=np.uint8)
         self._logo = np.zeros([100,100,3],dtype=np.uint8)
         self._logo_box = None
 
         # Parameters
-        self.MIN_MATCH_COUNT = 4
-        self.MAX_MATCH_COUNT = 30
+        self.MIN_MATCH_COUNT = 6
+        self.MAX_MATCH_COUNT = 12
 
         # Flags
         self._has_rotated_image = False
@@ -27,16 +33,16 @@ class Lego(object):
         self._has_information = False
 
         #the main part of the algorithm
-        self._logo_detect(image)
+        self._logo_detect()
         self._get_rotate_angle()
         self._get_rotated_image()
         self._get_information()
 
-    def _logo_detect(self,image):
-        rows, cols, _ = image.shape
+    def _logo_detect(self):
+        rows, cols, _ = self._image.shape
 
         # Convert BGR to HSV
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(self._image, cv2.COLOR_BGR2HSV)
 
         # define range of red color in HSV
         lower_red1 = np.array([0, 50, 50])
@@ -65,7 +71,7 @@ class Lego(object):
             if (np.sqrt(area) * 4 <= perimeter * 1.2) & (np.sqrt(area) * 4 >= perimeter * 0.8):
                 new_contours.append(contour)
 
-        if len(new_contours) >= 1:
+        if (len(new_contours) >= 1):
             # take the biggest suitable contour
             cnt = sorted(new_contours, key=cv2.contourArea, reverse=True)[0]
 
@@ -96,7 +102,7 @@ class Lego(object):
             kp2, des2 = akaze.detectAndCompute(gray_image2, None)
 
             bf = cv2.BFMatcher(cv2.NORM_HAMMING)
-            if des2 != None:
+            if des2 is not None:
                 matches = bf.knnMatch(des1, des2, k=2)
             else:
                 matches = []
@@ -110,15 +116,16 @@ class Lego(object):
                 pass
 
             # the key-points matched within certain ranges.
-            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
+            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) >= self.MAX_MATCH_COUNT):
                 src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
                 dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
                 # calculate the rotate angles
-                Ang = extLogo.__calcuAngle__(src_pts, dst_pts)
+                lyu = imgPreprocessing.LogoAffinePos(self._pureLogo)
+                Ang = lyu.__calcuAngle__(src_pts, dst_pts)
                 # check if there is a angle(if the potential logo is a valid lego logo )
-                if np.isnan(Ang):
-                    self._has_valid_logo = False
+                if np.isnan(Ang) | (len(good_matches) < 6):
+                    self._has_valid_logo =False
                 else:
                     self._rotate_angle = Ang/np.pi*180
                     self._has_rotate_angle = True
@@ -161,16 +168,13 @@ class Lego(object):
             self._has_rotated_image = True
 
     def get_logo_box(self):
-        if self._has_potential_logo:
-            return self._logo_box
-        else:
-            return None
+        return self._logo_box
 
     def get_logo_image(self):
-        if self._has_valid_logo:
-            return self._logo
+        return self._logo
 
     def get_information_part(self):
-        if self._has_information:
-            return self._information
+        return self._information
 
+    def get_rotated_image(self):
+        return self._rotated_image
