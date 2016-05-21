@@ -211,10 +211,11 @@ class LogoAffinePos(object):
         if(rtnFlag is False):
             return logoContourPts, cPts, None, None, False
         else:
-            cPrsRes = cPts.copy()
+            cPtsRes = cPts.copy()
             cPts, rcvM, _ = self.getRcvAffineInfo(logoContourPts, cPts)
             imggray = cv2.warpPerspective(imggray, rcvM, (imgW,imgH))
             affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
+            affinedcPts = affinedcPts.astype('int32')
             xMax,yMax = affinedcPts.max(axis=0).flatten() + 10
             xMin,yMin = affinedcPts.min(axis=0).flatten() - 10
             if((xMin<0) | (yMin<0) | (xMax>imgW) | (yMax>imgH)):
@@ -227,10 +228,14 @@ class LogoAffinePos(object):
             if Ang is None:
                 return logoContourPts, cPts, affinedcPts, rcvM, False
             else:
-                cPts = cPrsRes.copy()
+                cPts = cPtsRes.copy()
                 cPts, rcvM, rtnFlag = self.getRcvAffineInfo(logoContourPts, cPts, -Ang)
                 if (rtnFlag is False):
                     return logoContourPts, cPts, affinedcPts, None, False
                 affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
                 affinedImg = cv2.warpPerspective(img, rcvM, (imgW,imgH))
+                nxMin,nxMax,nyMin,nyMax = [xMin,xMax,yMax+10,yMax+(yMax-yMin)+10]
+                if((nxMin<0) | (nyMin<0) | (nxMax>imgW) | (nyMax>imgH)):
+                    return logoContourPts, cPts, affinedcPts, rcvM, False
+                self.croped = affinedImg[nyMin:nyMax,nxMin:nxMax]
                 return logoContourPts, cPts, affinedcPts, affinedImg, True

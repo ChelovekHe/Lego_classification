@@ -14,8 +14,8 @@ class Lego(object):
     def __init__(self, image):
         # initialize attributes
         self._pureLogo = cv2.imread('../fig/purelogo256.png')
-        self._image = image
-        self._rotated_image = image
+        self._image = image.copy()
+        self._rotated_image = image.copy()
         self._rotate_angle = None
         self._information = np.zeros([100,100,3],dtype=np.uint8)
         self._logo = np.zeros([100,100,3],dtype=np.uint8)
@@ -56,7 +56,7 @@ class Lego(object):
         mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
         self._mask = mask1 + mask2
 
-        _, contours, _ = cv2.findContours(self._mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        _, contours, _ = cv2.findContours(self._mask.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)
         new_contours = []
         for idx, contour in enumerate(contours):
@@ -139,6 +139,7 @@ class Lego(object):
         if self._has_valid_logo & self._has_rotated_image:
             ylimit, xlimit, _ = self._image.shape
             height, weight, _ = self._logo.shape
+            # print(height, weight)
 
             cropst = np.array([self._logo_center_y+height/2, self._logo_center_x-weight/2])
             croped = np.array([self._logo_center_y+height+height/2, self._logo_center_x+weight/2])
