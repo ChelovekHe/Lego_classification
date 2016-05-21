@@ -33,13 +33,13 @@ def initial_li_class(image):
      return li
 
 def get_affined_image(lyu, image):
-    logoContourPts, cPts, affinedcPts, affinedImg, rtnFlag = lyu.rcvAffinedAll(image)
+    logoContourPts, cPts, affinedcPts, affinedImg, croped, rtnFlag = lyu.rcvAffinedAll(image)
     if (rtnFlag is True):
         affined = affinedImg
         affined = resize(affined, FRAME_SIZE_FACTOR)
         # cv2.imshow('affined', affined)
         # cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
-        lyu_info = lyu.croped
+        lyu_info = croped
         if lyu_info is not None:
             lyu_info = denoise_info(lyu_info)
             lyu_info = resize(lyu_info)
@@ -70,7 +70,6 @@ def save_info(img, s):
         print(temp_count)
 
 if __name__ == '__main__':
-    i = 0
     cap = cv2.VideoCapture(0)
     lyu = initial_lyu_class()
     while 1:
@@ -86,9 +85,9 @@ if __name__ == '__main__':
             # save_info(li_info, compare_image(li_info))
 
         lyu_info = get_affined_image(lyu, frame.copy())
-        if lyu_info is not None:
-            lyu_info = cv2.resize(lyu_info, (80, 80))
-            save_info(lyu_info, compare_image(lyu_info))
+        # if lyu_info is not None:
+        #     lyu_info = cv2.resize(lyu_info, (80, 80))
+            # save_info(lyu_info, compare_image(lyu_info))
             # text = ocr(lyu_info)
             # print(text)
 
@@ -98,6 +97,5 @@ if __name__ == '__main__':
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == 27:
             break
-        i = i + 1
     cap.release()
     cv2.destroyAllWindows()
