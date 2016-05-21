@@ -15,6 +15,7 @@ def resize(image, factor=0.5):
     return image
 
 def ocr(info):
+    cv2.imwrite('info.jpg', info)
     img = Image.open('info.jpg')
     tr = Tesseract(datadir='../tessdata', lang='eng')
     text = tr.ocr_image(img)
@@ -36,14 +37,15 @@ def get_affined_image(lyu, image):
     if (rtnFlag is True):
         affined = affinedImg
         affined = resize(affined, FRAME_SIZE_FACTOR)
-        cv2.imshow('affined', affined)
-        cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
-    lyu_info = lyu.croped
-    lyu_info = denoise_info(lyu_info)
-    lyu_info = resize(lyu_info)
-    cv2.imshow('lyu_info', lyu_info)
-    cv2.moveWindow('lyu_info',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
-    return lyu_info
+        # cv2.imshow('affined', affined)
+        # cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
+        lyu_info = lyu.croped
+        if lyu_info is not None:
+            lyu_info = denoise_info(lyu_info)
+            lyu_info = resize(lyu_info)
+            cv2.imshow('lyu_info', lyu_info)
+            cv2.moveWindow('lyu_info',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
+        return lyu_info
 
 def get_rotated_image(li):
     if li._has_rotated_image:
@@ -62,7 +64,7 @@ def get_info_part(li):
 
 def save_info(img, s):
     global temp_count
-    if (s < 0.5) & (temp_count<=100):
+    if (s < 0.8) & (temp_count<=100):
         cv2.imwrite('../info/info'+ str(temp_count) +'.jpg', img)
         temp_count += 1
         print(temp_count)
@@ -75,19 +77,20 @@ if __name__ == '__main__':
         _, frame = cap.read()
 
         li = initial_li_class(frame.copy())
-        get_rotated_image(li)
-        li_info = get_info_part(li)
-        if li_info is not None:
-            li_info = cv2.resize(li_info, (80, 80))
-            # print(compare_image(li_info))
-            save_info(li_info, compare_image(li_info))
-        # text = ocr(info)
+        # get_rotated_image(li)
 
-        # try:
-        #     lyu_info = get_affined_image(lyu, frame.copy())
-        #     save_info(lyu_info, compare_image(lyu_info))
-        # except:
-        #     pass
+        li_info = get_info_part(li)
+        # if li_info is not None:
+            # li_info = cv2.resize(li_info, (80, 80))
+            # print(compare_image(li_info))
+            # save_info(li_info, compare_image(li_info))
+
+        lyu_info = get_affined_image(lyu, frame.copy())
+        if lyu_info is not None:
+            lyu_info = cv2.resize(lyu_info, (80, 80))
+            save_info(lyu_info, compare_image(lyu_info))
+            # text = ocr(lyu_info)
+            # print(text)
 
         logo_box = li.get_logo_box()
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
