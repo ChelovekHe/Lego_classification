@@ -8,6 +8,8 @@ from Lego.imgPreprocessing import LogoAffinePos
 from Lego.extend import denoise_info
 
 
+FRAME_SIZE_FACTOR = 0.4
+
 def resize(image, factor=0.5):
     image = cv2.resize(image, (0, 0), fx=factor, fy=factor)
     return image
@@ -33,34 +35,30 @@ def get_affined_image(lyu, image):
     logoContourPts, cPts, affinedcPts, affinedImg, rtnFlag = lyu.rcvAffinedAll(image)
     if (rtnFlag is True):
         affined = affinedImg
-        affined = resize(affined, 0.4)
+        affined = resize(affined, FRAME_SIZE_FACTOR)
         # cv2.drawContours(affined, [cPts], -1, (0, 255, 0), 2)
         cv2.imshow('affined', affined)
-        cv2.moveWindow('affined',int(1280*0.35),int(720*0.35))
+        cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
     lyu_info = lyu.croped
     lyu_info = denoise_info(lyu_info)
-    lyu_info = resize(lyu_info, 0.5)
+    lyu_info = resize(lyu_info)
     cv2.imshow('lyu_info', lyu_info)
-    cv2.moveWindow('lyu_info',int(1280*0.35),int(720*0.35))
+    cv2.moveWindow('lyu_info',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
 
 def get_rotated_image(li):
     if li._has_rotated_image:
         rotated = li.get_rotated_image()
-        rotated = resize(rotated, 0.4)
+        rotated = resize(rotated, FRAME_SIZE_FACTOR)
         cv2.imshow('rotate', rotated)
-        cv2.moveWindow('rotate',int(1280*0.35),0)
+        cv2.moveWindow('rotate',int(1280*FRAME_SIZE_FACTOR),0)
 
-def get_info_part(li, lyu, i):
+def get_info_part(li, lyu):
     if li._has_information & li._has_valid_logo:
         li_info = li.get_information_part()
-        li_info = resize(li_info, 0.5)
+        li_info = resize(li_info)
         cv2.imshow('li_info', li_info)
-        cv2.moveWindow('li_info',int(1280*0.35),0)
-        print(i)
-        if divmod(i, 100)[0] == 0:
-            temp = i/100
-            # print(temp)
-            # cv2.imwrite('../info/info'+ str(temp) +'.jpg', info)
+        cv2.moveWindow('li_info',int(1280*FRAME_SIZE_FACTOR),0)
+
 
 if __name__ == '__main__':
     i = 0
@@ -71,8 +69,9 @@ if __name__ == '__main__':
 
         li = initial_li_class(frame.copy())
         get_rotated_image(li)
-        info = get_info_part(li, lyu, i)
+        info = get_info_part(li, lyu)
         # text = ocr(info)
+        # cv2.imwrite('../info/info'+ str(temp) +'.jpg', info)
         try:
             get_affined_image(lyu, frame.copy())
         except:
@@ -80,7 +79,7 @@ if __name__ == '__main__':
 
         logo_box = li.get_logo_box()
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
-        frame = resize(frame, 0.4)
+        frame = resize(frame, FRAME_SIZE_FACTOR)
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == 27:
             break
