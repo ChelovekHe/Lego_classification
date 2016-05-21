@@ -9,6 +9,7 @@ from Lego.extend import *
 
 FRAME_SIZE_FACTOR = 0.4
 temp_count = 0
+logo_box = None
 
 def resize(image, factor=0.5):
     image = cv2.resize(image, (0, 0), fx=factor, fy=factor)
@@ -40,6 +41,8 @@ def get_affined_image(lyu, image):
         # cv2.imshow('affined', affined)
         # cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
         lyu_info = croped
+        # global logo_box
+        # logo_box = cPts
         if lyu_info is not None:
             lyu_info = denoise_info(lyu_info)
             lyu_info = resize(lyu_info)
@@ -91,7 +94,8 @@ if __name__ == '__main__':
             # text = ocr(lyu_info)
             # print(text)
 
-        logo_box = li.get_logo_box()
+        # logo_box = li.get_logo_box()
+
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
         frame = resize(frame, FRAME_SIZE_FACTOR)
         cv2.imshow('frame', frame)
