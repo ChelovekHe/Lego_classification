@@ -18,7 +18,7 @@ class Lego(object):
         self._image = image.copy()
         self._rotated_image = image.copy()
         self._rotate_angle = None
-        self._information = np.zeros([100,100,3],dtype=np.uint8)
+        self._information = None
         self._logo = np.zeros([100,100,3],dtype=np.uint8)
         self._logo_box = None
 

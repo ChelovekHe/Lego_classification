@@ -5,10 +5,10 @@ from PIL import Image
 from tesserwrap import Tesseract
 from Lego.Lego import Lego
 from Lego.imgPreprocessing import LogoAffinePos
-from Lego.extend import denoise_info
-
+from Lego.extend import *
 
 FRAME_SIZE_FACTOR = 0.4
+temp_count = 0
 
 def resize(image, factor=0.5):
     image = cv2.resize(image, (0, 0), fx=factor, fy=factor)
@@ -36,7 +36,6 @@ def get_affined_image(lyu, image):
     if (rtnFlag is True):
         affined = affinedImg
         affined = resize(affined, FRAME_SIZE_FACTOR)
-        # cv2.drawContours(affined, [cPts], -1, (0, 255, 0), 2)
         cv2.imshow('affined', affined)
         cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
     lyu_info = lyu.croped
@@ -44,6 +43,7 @@ def get_affined_image(lyu, image):
     lyu_info = resize(lyu_info)
     cv2.imshow('lyu_info', lyu_info)
     cv2.moveWindow('lyu_info',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
+    return lyu_info
 
 def get_rotated_image(li):
     if li._has_rotated_image:
@@ -52,13 +52,20 @@ def get_rotated_image(li):
         cv2.imshow('rotate', rotated)
         cv2.moveWindow('rotate',int(1280*FRAME_SIZE_FACTOR),0)
 
-def get_info_part(li, lyu):
-    if li._has_information & li._has_valid_logo:
-        li_info = li.get_information_part()
+def get_info_part(li):
+    li_info = li.get_information_part()
+    if li_info is not None:
         li_info = resize(li_info)
         cv2.imshow('li_info', li_info)
         cv2.moveWindow('li_info',int(1280*FRAME_SIZE_FACTOR),0)
+    return li_info
 
+def save_info(img, s):
+    global temp_count
+    if (s < 0.5) & (temp_count<=100):
+        cv2.imwrite('../info/info'+ str(temp_count) +'.jpg', img)
+        temp_count += 1
+        print(temp_count)
 
 if __name__ == '__main__':
     i = 0
@@ -69,13 +76,18 @@ if __name__ == '__main__':
 
         li = initial_li_class(frame.copy())
         get_rotated_image(li)
-        info = get_info_part(li, lyu)
+        li_info = get_info_part(li)
+        if li_info is not None:
+            li_info = cv2.resize(li_info, (80, 80))
+            # print(compare_image(li_info))
+            save_info(li_info, compare_image(li_info))
         # text = ocr(info)
-        # cv2.imwrite('../info/info'+ str(temp) +'.jpg', info)
-        try:
-            get_affined_image(lyu, frame.copy())
-        except:
-            pass
+
+        # try:
+        #     lyu_info = get_affined_image(lyu, frame.copy())
+        #     save_info(lyu_info, compare_image(lyu_info))
+        # except:
+        #     pass
 
         logo_box = li.get_logo_box()
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
