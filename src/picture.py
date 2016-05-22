@@ -55,17 +55,16 @@ def get_info_part(li):
     return li_info
 
 if __name__ == '__main__':
-    cap = cv2.VideoCapture(0)
-    while 1:
-        global logo_box
-        _, frame = cap.read()
 
-        # li = initial_li_class(frame.copy())
+        p1 = os.listdir('../fig')
+        p2 = os.listdir('../fig/' + p1[3] + '/')
+
+        li = initial_li_class(frame.copy())
         lyu = initial_lyu_class()
-        # logo_box = li.get_logo_box()
+        logo_box = li.get_logo_box()
         # get_rotated_image(li)
 
-        # li_info = get_info_part(li)
+        li_info = get_info_part(li)
         # if li_info is not None:
             # print(compare_image(li_info))
             # save_info_image(li_info, compare_image(li_info))

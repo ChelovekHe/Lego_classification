@@ -14,9 +14,10 @@ ssim_list = []
 
 def denoise_info(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-    kernel = np.ones((2, 2), np.uint8)
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+    # _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    # kernel = np.ones((2, 2), np.uint8)
+    # thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
+    thresh = gray
     return thresh
 
 
@@ -46,9 +47,8 @@ def ocr(info):
 def save_info_image(img, s):
     global temp_count, train_box, train_box_logo, ssim_list
     path = '../info/box' + str(train_box)
-    try:
+    if not os.path.exists(path):
         os.mkdir(path)
-    except OSError: pass
 
     if (s < 0.8) & (temp_count <= 100):
         cv2.imwrite(path + '/' + str(train_box_logo) + str(temp_count) + '.jpg', img)
