@@ -1,8 +1,6 @@
 import os
 
 import cv2
-from PIL import Image
-from tesserwrap import Tesseract
 from Lego.Lego import Lego
 from Lego.imgPreprocessing import LogoAffinePos
 from Lego.extend import *
@@ -10,17 +8,6 @@ from Lego.extend import *
 FRAME_SIZE_FACTOR = 0.4
 temp_count = 0
 logo_box = None
-
-def resize(image, factor=0.5):
-    image = cv2.resize(image, (0, 0), fx=factor, fy=factor)
-    return image
-
-def ocr(info):
-    cv2.imwrite('info.jpg', info)
-    img = Image.open('info.jpg')
-    tr = Tesseract(datadir='../tessdata', lang='eng')
-    text = tr.ocr_image(img)
-    return text
 
 def initial_lyu_class():
     imgPATH = '../fig/'
@@ -41,8 +28,8 @@ def get_affined_image(lyu, image):
         # cv2.imshow('affined', affined)
         # cv2.moveWindow('affined',int(1280*FRAME_SIZE_FACTOR),int(720*FRAME_SIZE_FACTOR))
         lyu_info = croped
-        # global logo_box
-        # logo_box = cPts
+        global logo_box
+        logo_box = cPts
         if lyu_info is not None:
             lyu_info = denoise_info(lyu_info)
             lyu_info = resize(lyu_info)
@@ -74,11 +61,13 @@ def save_info(img, s):
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
-    lyu = initial_lyu_class()
     while 1:
+        # global logo_box
         _, frame = cap.read()
 
         li = initial_li_class(frame.copy())
+        lyu = initial_lyu_class()
+        logo_box = li.get_logo_box()
         # get_rotated_image(li)
 
         li_info = get_info_part(li)
@@ -93,8 +82,6 @@ if __name__ == '__main__':
             # save_info(lyu_info, compare_image(lyu_info))
             # text = ocr(lyu_info)
             # print(text)
-
-        # logo_box = li.get_logo_box()
 
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
         frame = resize(frame, FRAME_SIZE_FACTOR)

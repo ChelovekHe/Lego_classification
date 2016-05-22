@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from PIL import Image
+from tesserwrap import Tesseract
 from skimage.measure import compare_ssim as ssim
 
 temp_img = None
@@ -19,3 +21,14 @@ def compare_image(img):
         s = 0
     temp_img = img
     return s
+
+def resize(image, factor=0.5):
+    image = cv2.resize(image, (0, 0), fx=factor, fy=factor)
+    return image
+
+def ocr(info):
+    cv2.imwrite('../fig/info.jpg', info)
+    img = Image.open('../fig/info.jpg')
+    tr = Tesseract(datadir='../tessdata', lang='eng')
+    text = tr.ocr_image(img)
+    return text
