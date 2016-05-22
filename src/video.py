@@ -67,18 +67,21 @@ if __name__ == '__main__':
         li_info = get_info_part(li)
         # if li_info is not None:
             # print(compare_image(li_info))
-            # save_info(li_info, compare_image(li_info))
+            # save_info_image(li_info, compare_image(li_info))
 
         lyu_info = get_affined_image(lyu, frame.copy())
         if lyu_info is not None:
-            save_info(lyu_info, compare_image(lyu_info))
+            save_info_image(lyu_info, compare_image(lyu_info))
             # text = ocr(lyu_info)
 
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
         frame = resize(frame, FRAME_SIZE_FACTOR)
+        frame = put_text(frame.copy())
         cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == 27:
+
+        if get_train_index():
             break
+    # write_ssim()
     cap.release()
     cv2.destroyAllWindows()
 

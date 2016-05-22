@@ -102,18 +102,14 @@ class Lego(object):
             kp2, des2 = akaze.detectAndCompute(gray_image2, None)
 
             bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+            matches = []
+            good_matches = []
             if des2 is not None:
                 matches = bf.knnMatch(des1, des2, k=2)
-            else:
-                matches = []
-
-            good_matches = []
-            try:
-                for m, n in matches:
-                    if m.distance < 0.7*n.distance:
-                        good_matches.append(m)
-            except:
-                pass
+                if len(matches[0]) == 2:
+                    for i, (m, n) in enumerate(matches):
+                        if m.distance < 0.7*n.distance:
+                            good_matches.append(m)
 
             # print(len(good_matches))
             # the key-points matched within certain ranges.

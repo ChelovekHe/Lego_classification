@@ -22,6 +22,7 @@ class LogoAffinePos(object):
     # extracting the lego logo(red quadrangle)
     def extLegoLogo(self, img, minArea = 0):
         # It will extract the red area from the image
+        logoContourPts = None
         self.__imgH,self.__imgW,_ = img.shape
         imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
         lower_red = np.array([0,40,40])
@@ -104,7 +105,7 @@ class LogoAffinePos(object):
         elif (extraRotation > (-angGap-90)) & (extraRotation < (angGap-90)) :
             pp = pp[[1,2,3,0]]
         else:
-            print("invalied extraRotation:",extraRotation)
+            # print("invalied extraRotation:",extraRotation)
             return None, None, False
         
         cPts = cPts[pp]
