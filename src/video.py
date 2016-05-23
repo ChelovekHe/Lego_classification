@@ -7,6 +7,7 @@ from Lego.extend import *
 FRAME_SIZE_FACTOR = 0.4
 info_size = 30
 logo_box = None
+lyu_info = None
 
 
 def initial_lyu_class():
@@ -33,9 +34,9 @@ def get_affined_image(lyu, image):
         global logo_box
         logo_box = cPts
         if lyu_info is not None:
-            lyu_info = denoise_info(lyu_info)
-            lyu_info = cv2.resize(lyu_info, (info_size, info_size))
-            cv2.imshow('lyu_info', lyu_info)
+            gray = gray_image(lyu_info)
+            lyu_info = cv2.resize(gray, (info_size, info_size))
+            cv2.imshow('lyu_info', lyu_info.copy())
             cv2.moveWindow('lyu_info', int(1280*FRAME_SIZE_FACTOR), int(720*FRAME_SIZE_FACTOR))
         return lyu_info
 
@@ -57,7 +58,6 @@ def get_info_part(li):
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
     while 1:
-        global logo_box
         _, frame = cap.read()
 
         # li = initial_li_class(frame.copy())
@@ -69,10 +69,12 @@ if __name__ == '__main__':
         # if li_info is not None:
             # print(compare_image(li_info))
             # save_info_image(li_info, compare_image(li_info))
-
-        lyu_info = get_affined_image(lyu, frame.copy())
+        try:
+            lyu_info = get_affined_image(lyu, frame.copy())
+        except:
+            pass
         if lyu_info is not None:
-            save_info_image(lyu_info, compare_image(lyu_info))
+            save_training_info_image(lyu_info, 98)
             # text = ocr(lyu_info)
 
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
@@ -80,9 +82,8 @@ if __name__ == '__main__':
         frame = put_text(frame.copy())
         cv2.imshow('frame', frame)
 
-        if get_train_index():
+        if get_keyboard():
             break
-    # write_ssim()
     cap.release()
     cv2.destroyAllWindows()
 

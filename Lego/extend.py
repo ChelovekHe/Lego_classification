@@ -6,11 +6,11 @@ from PIL import Image
 from tesserwrap import Tesseract
 from skimage.measure import compare_ssim as ssim
 
-temp_img = None
-temp_count = 0
-train_box = 1
+temp_count = 1
+train_box = 0
 train_box_logo = 1
-ssim_list = []
+temp_img = None
+
 
 def denoise_info(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -20,8 +20,25 @@ def denoise_info(img):
     thresh = gray
     return thresh
 
+def gray_image(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return gray
 
-def compare_image(img):
+
+def compare_to_box_info(img):
+    global train_box, train_box_logo
+    box_serial = get_box_serials()
+    path = '../fig_sample/box_info_final/'+box_serial[train_box]+'.'+str(train_box_logo)+'.jpg'
+    temp_img = cv2.imread(path)
+    if temp_img is not None:
+        temp_img = gray_image(temp_img)
+        img2 = cv2.resize(temp_img, (30, 30))
+        s = ssim(img, img2)
+    else:
+        s = 0
+    return s
+
+def compare_to_last_info(img):
     global temp_img
     if temp_img is not None:
         s = ssim(img, temp_img)
@@ -44,23 +61,26 @@ def ocr(info):
     print(text)
 
 
-def save_info_image(img, s):
-    global temp_count, train_box, train_box_logo, ssim_list
-    path = '../info/box' + str(train_box) + '.' + str(train_box_logo)
-    if not os.path.exists(path):
-        os.mkdir(path)
-    elif os.path.exists(path):
-        os.rmdir(path)
-        os.mkdir(path)
+def save_training_info_image(img, count=1):
+    global temp_count, train_box, train_box_logo
+    if (count != 1) & (temp_count < count):
+        temp_count = count
+    s1 = compare_to_last_info(img)
+    s2 = compare_to_box_info(img)
+    box_serial_list = get_box_serials()
+    path = '../info/'+box_serial_list[train_box]+'.'+str(train_box_logo)
 
-    if (s < 0.8) & (temp_count <= 100):
-        cv2.imwrite(path + '/' + str(train_box_logo) + str(temp_count) + '.jpg', img)
+    if (s1 < 0.8) & (temp_count <= 100) & (s2 != 0):
+        if not os.path.exists(path):
+            os.mkdir(path)
+        cv2.imwrite(path + '/'+str(temp_count) + '.jpg', img)
+        print(str(temp_count)+'   '+str(s2))
         temp_count += 1
-        ssim_list.append(s)
-        print(temp_count)
+    elif (s2 == 0):
+        print('No example info images')
 
 
-def get_train_index():
+def get_keyboard():
     flag = False
     global train_box, train_box_logo, temp_count
     k = cv2.waitKey(10) & 0xFF
@@ -68,32 +88,40 @@ def get_train_index():
         flag = True
         return flag
     elif k == ord('b'):
-        train_box += 1
-        train_box_logo = 1
-        temp_count = 0
-        return flag
-    elif k == ord('='):
-        train_box_logo += 1
-        temp_count = 0
-        return flag
+        if train_box <= 3:
+            train_box += 1
+            train_box_logo = 1
+            temp_count = 1
+        elif train_box >= 4:
+            train_box = 0
+    elif k == ord('o'):
+        if train_box_logo <= 5:
+            train_box_logo += 1
+            temp_count = 1
+        else:
+            train_box_logo = 1
     return flag
+
 
 def put_text(img):
     global train_box, train_box_logo
-    string = 'box: ' + str(train_box) + ' orient: ' + str(train_box_logo)
-    cv2.putText(img, string, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 1)
+    box_serial = get_box_serials()
+    string = 'box: ' + box_serial[train_box] + ' orient: ' + str(train_box_logo)
+    cv2.putText(img, string, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
     return img
+
 
 def write_ssim():
     global ssim_list, train_box
     path = '../info/box' + str(train_box)
-    with open(path + '/ssim_value.txt','w+') as f:
-        for i in range(1,len(ssim_list)-1):
+    with open(path + '/ssim_value.txt', 'w+') as f:
+        for i in range(1, len(ssim_list)-1):
             f.writelines(["%s\n" % str(ssim_list[i])])
 
-def get_box_list():
+
+def get_box_serials():
     path = '../info/info.txt'
     with open(path) as f:
-        list = f.read()
-        line = list.split('\n')
+        list1 = f.read()
+        line = list1.split('\n')
     return line
