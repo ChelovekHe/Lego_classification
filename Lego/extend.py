@@ -46,8 +46,11 @@ def ocr(info):
 
 def save_info_image(img, s):
     global temp_count, train_box, train_box_logo, ssim_list
-    path = '../info/box' + str(train_box)
+    path = '../info/box' + str(train_box) + '.' + str(train_box_logo)
     if not os.path.exists(path):
+        os.mkdir(path)
+    elif os.path.exists(path):
+        os.rmdir(path)
         os.mkdir(path)
 
     if (s < 0.8) & (temp_count <= 100):
@@ -87,3 +90,10 @@ def write_ssim():
     with open(path + '/ssim_value.txt','w+') as f:
         for i in range(1,len(ssim_list)-1):
             f.writelines(["%s\n" % str(ssim_list[i])])
+
+def get_box_list():
+    path = '../info/info.txt'
+    with open(path) as f:
+        list = f.read()
+        line = list.split('\n')
+    return line
