@@ -62,6 +62,7 @@ target/
 .ipynb_checkpoints
 
 #dataset
+data/
 info2/
 info/
 fig/
