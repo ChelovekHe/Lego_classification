@@ -68,12 +68,12 @@ def save_training_info_image(img, count=1):
     s1 = compare_to_last_info(img)
     s2 = compare_to_box_info(img)
     box_serial_list = get_box_serials()
-    path = '../info/'+box_serial_list[train_box]+'.'+str(train_box_logo)
+    path = '../info/'+box_serial_list[train_box]
 
     if (s1 < 0.8) & (temp_count <= 100) & (s2 != 0):
         if not os.path.exists(path):
             os.mkdir(path)
-        cv2.imwrite(path + '/'+str(temp_count) + '.jpg', img)
+        cv2.imwrite(path+'/'+str(train_box_logo)+'.'+str(temp_count).zfill(3)+'.jpg', img)
         print(str(temp_count)+'   '+str(s2))
         temp_count += 1
     elif (s2 == 0):
@@ -125,3 +125,10 @@ def get_box_serials():
         list1 = f.read()
         line = list1.split('\n')
     return line
+
+def listdir_no_hidden(path):
+    list1 = []
+    for f in os.listdir(path):
+        if not f.startswith('.'):
+            list1.append(f)
+    return list1

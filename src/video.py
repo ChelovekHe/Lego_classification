@@ -74,7 +74,7 @@ if __name__ == '__main__':
         except:
             pass
         if lyu_info is not None:
-            save_training_info_image(lyu_info, 98)
+            save_training_info_image(lyu_info)
             # text = ocr(lyu_info)
 
         cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
