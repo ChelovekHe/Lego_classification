@@ -57,6 +57,10 @@ def keras_cnn():
     model.add(Activation('relu'))
     model.add(Dropout(0.25))
 
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.25))
+
     # softmax classification
     model.add(Dense(nb_classes))
     model.add(Activation('softmax'))
@@ -64,9 +68,9 @@ def keras_cnn():
     # ----------------------------
     # start training
     # SGD + momentum
-    # sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    # model.compile(loss='categorical_crossentropy', optimizer=sgd,metrics=['accuracy'])
-    model.compile(loss='categorical_crossentropy', optimizer='Adadelta', metrics=['accuracy'])
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd,metrics=['accuracy'])
+    # model.compile(loss='categorical_crossentropy', optimizer='Adadelta', metrics=['accuracy'])
 
     model.fit(data, label, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1, validation_split=0.2)
 
@@ -81,16 +85,16 @@ def load_data():
         for j in range(0, len(list2)):
             img = Image.open(path+list1[i]+'/'+list2[j])
             arr = np.asarray(img, dtype='float32').reshape((1, 1, 30, 30))
-            # normed = (arr - np.mean(arr)) / np.std(arr)
+            normed = (arr - np.mean(arr)) / np.std(arr)
             data = np.append(data, arr, axis=0)
             label.append(i-1)
     label = np.asarray(label, dtype='uint8').reshape((len(label), ))
     data = data[1:, :, :, :]
-    # scale = np.max(data)
-    # data /= scale
-    # mean = np.std(data)
-    # data -= mean
-    data = (data - np.mean(data)) / np.std(data)
+    scale = np.max(data)
+    data /= scale
+    mean = np.std(data)
+    data -= mean
+    # data = (data - np.mean(data)) / np.std(data)
     return data, label
 
 
