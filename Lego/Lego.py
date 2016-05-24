@@ -10,7 +10,6 @@ import cv2
 import imgPreprocessing
 import extend
 
-
 class Lego(object):
     def __init__(self, image):
         # initialize attributes
@@ -23,8 +22,8 @@ class Lego(object):
         self._logo_box = None
 
         # Parameters
-        self.MIN_MATCH_COUNT = 6
-        self.MAX_MATCH_COUNT = 12
+        self.MIN_MATCH_COUNT = 4
+        self.MAX_MATCH_COUNT = 40
 
         # Flags
         self._has_rotated_image = False
@@ -103,21 +102,18 @@ class Lego(object):
             kp2, des2 = akaze.detectAndCompute(gray_image2, None)
 
             bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+            matches = []
+            good_matches = []
             if des2 is not None:
                 matches = bf.knnMatch(des1, des2, k=2)
-            else:
-                matches = []
+                if len(matches[0]) == 2:
+                    for i, (m, n) in enumerate(matches):
+                        if m.distance < 0.7*n.distance:
+                            good_matches.append(m)
 
-            good_matches = []
-            try:
-                for m, n in matches:
-                    if m.distance < 0.7*n.distance:
-                        good_matches.append(m)
-            except:
-                pass
-
+            # print(len(good_matches))
             # the key-points matched within certain ranges.
-            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) >= self.MAX_MATCH_COUNT):
+            if (len(good_matches) >= self.MIN_MATCH_COUNT) & (len(good_matches) <= self.MAX_MATCH_COUNT):
                 src_pts = np.float64([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
                 dst_pts = np.float64([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
@@ -125,7 +121,7 @@ class Lego(object):
                 lyu = imgPreprocessing.LogoAffinePos(self._pureLogo)
                 Ang = lyu.__calcuAngle__(src_pts, dst_pts)
                 # check if there is a angle(if the potential logo is a valid lego logo )
-                if np.isnan(Ang) | (len(good_matches) < 6):
+                if (Ang is None):
                     self._has_valid_logo =False
                 else:
                     self._rotate_angle = Ang/np.pi*180
