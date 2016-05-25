@@ -7,11 +7,13 @@
 import cv2
 from PIL import Image
 import threading
+import Levenshtein
 import Lego.dsOperation as dso
 import Lego.imgPreprocessing as imgprep
 # import time
 from Lego.ocr import tesserOcr
-import Levenshtein
+from Lego.extend import numMatch
+
 
 capImg = None
 resImg = None
@@ -30,22 +32,22 @@ def capFrame(cap):
         if (stopFlat > 0):
             break
 
-def numMatch(boxesds,num):
-    matchRst = None
-    if (num is None):
-        return matchRst
-    tempSim = 0
-    maxSim = 0
-    print('+------------------+')
-    for item in boxesds:
-        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
-        print(item.boxname+': '+ str(tempSim))
-        if(tempSim > maxSim):
-            maxSim = tempSim
-            matchRst = item.boxname
-    print('+------------------+\n')
+# def numMatch(boxesds,num):
+#     matchRst = None
+#     if (num is None):
+#         return matchRst
+#     tempSim = 0
+#     maxSim = 0
+#     print('+------------------+')
+#     for item in boxesds:
+#         tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+#         print(item.boxname+': '+ str(tempSim))
+#         if(tempSim > maxSim):
+#             maxSim = tempSim
+#             matchRst = item.boxname
+#     print('+------------------+\n')
     
-    return matchRst
+#     return matchRst
 if __name__ == '__main__':
     settingInfo = open('../data/setting','r')
     settingInfo.readline()
@@ -110,7 +112,8 @@ if __name__ == '__main__':
             filtratedCroped = cv2.cvtColor(filtratedCroped,cv2.COLOR_GRAY2RGB)
             filtratedCroped = Image.fromarray(filtratedCroped)
             numStr = tesserOcr(filtratedCroped)
-            numMatch(boxesds,numStr)
+            matchedProb = numMatch(boxesds,numStr)
+            print(matchedProb)
 #             print(numStr)
 
         showImg = cv2.resize(showImg,(0,0),fx=showNarrowScale,fy=showNarrowScale)

@@ -1,7 +1,11 @@
-from Lego.imgPreprocessing import LogoAffinePos
+from Lego.imgPreprocessing import LogoAffinePos, imgFilter
 from Lego.extend import *
+import cv2
+from PIL import Image
 import numpy as np
 import cnn
+from Lego.ocr import tesserOcr
+import Lego.dsOperation as dso
 
 FRAME_SIZE_FACTOR = 0.4
 info_size = 30
@@ -23,9 +27,20 @@ def get_affined_image(lyu, image):
         lyu_info = croped
         global logo_box
         logo_box = cPts
-        if lyu_info is not None:
-            lyu_info = gray_image(lyu_info)
         return lyu_info
+
+def read_data():
+    settingInfo = open('../data/setting', 'r')
+    settingInfo.readline()
+    PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    DATAPATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    FEATURE_IMG_FOLDER = settingInfo.readline().strip().lstrip().rstrip(',')
+    MATERIAL_IMG_FOLDER = settingInfo.readline().strip().lstrip().rstrip(',')
+    BOX_DATA_PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    LOG_PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+
+    boxesds = dso.dsRead(BOX_DATA_PATH)
+    return  boxesds
 
 
 if __name__ == '__main__':
@@ -42,7 +57,19 @@ if __name__ == '__main__':
             except:
                 pass
             if lyu_info is not None:
-                cv2.imshow('info', lyu_info)
+                filtratedCroped = imgFilter(lyu_info)
+                ll = filtratedCroped.copy()
+                filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
+                filtratedCroped = Image.fromarray(filtratedCroped)
+                numStr = tesserOcr(filtratedCroped)
+                # print(numStr)
+                boxesds = read_data()
+                #
+                matched = numMatch(boxesds, numStr)
+                print(matched)
+
+                lyu_info = gray_image(lyu_info)
+                cv2.imshow('info', ll)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))
                 arr = np.asarray(gray, dtype='float32').reshape((1, 1, 30, 30))
@@ -52,7 +79,7 @@ if __name__ == '__main__':
                 predict_class = best_class(predict)
                 if predict_class is not None:
                     box_serials = get_box_serials()
-                    print(box_serials[predict_class])
+                    # print(box_serials[predict_class])
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)
