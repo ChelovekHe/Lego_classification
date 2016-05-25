@@ -151,7 +151,19 @@ def best_class(predict, batch=5):
         count = 1
         return np.argmax(temp_list1)
 
-    
+
+def combine_results(predict, matches):
+    temp_list1 = np.asarray(predict[0], dtype='float32')
+    temp_list2 = []
+    for i in matches.iteritems():
+        temp_list2.append(i[1])
+    temp_list2 = np.asarray(temp_list2, dtype='float32')
+    predict_list = np.add(temp_list1, temp_list2)
+    predict_class1 = np.argmax(temp_list1)
+    predict_class2 = np.argmax(temp_list2)
+    return predict_class1, predict_class2
+
+
 def numMatch(boxesds,num):
     matchedProb = None
     if (num is None):
