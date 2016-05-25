@@ -9,6 +9,7 @@ import cv2
 from PIL import Image
 import numpy as np
 from pytesseract import image_to_string
+from tesserwrap import Tesseract
 
 def tesserOcr(img):
     numStr = None
@@ -21,9 +22,12 @@ def tesserOcr(img):
         
     try:
         numList = image_to_string(imgPIL,lang='eng')
+        # tr = Tesseract(datadir='../data', lang='eng')
+        # numList = tr.ocr_image(imgPIL)
     except:
         numList = None
     else:
+        # print(numList)
         if(len(numList) < 2):
             numList = None
         else:
