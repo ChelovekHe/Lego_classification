@@ -5,10 +5,10 @@
 """
 
 import cv2
-import imgPreprocessing as imgprep
 from PIL import Image
+import Lego.imgPreprocessing as imgprep
 # import numpy as np
-from ocr import tesserOcr
+from Lego.ocr import tesserOcr
 
 if __name__ == '__main__':
     settingInfo = open('./data/setting','r')

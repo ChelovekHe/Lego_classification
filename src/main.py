@@ -6,11 +6,11 @@
 
 import cv2
 from PIL import Image
-import dsOperation as dso
-import imgPreprocessing as imgprep
 import threading
+import Lego.dsOperation as dso
+import Lego.imgPreprocessing as imgprep
 # import time
-from ocr import tesserOcr
+from Lego.ocr import tesserOcr
 import Levenshtein
 
 capImg = None
