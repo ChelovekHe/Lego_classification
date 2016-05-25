@@ -11,10 +11,11 @@ lyu_info = None
 
 def initial_lyu_class():
     img_path = '../fig/'
-    logoTp = cv2.imread(img_path + 'purelogo256.png')
-    lyu = LogoAffinePos(logoTp, featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(),
+    logo = cv2.imread(img_path + 'purelogo256.png')
+    lyu = LogoAffinePos(logo, featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(),
                         matchMethod='knnMatch')
     return lyu
+
 
 def get_affined_image(lyu, image):
     logoContourPts, cPts, affinedcPts, affinedImg, croped, rtnFlag = lyu.rcvAffinedAll(image)
@@ -23,8 +24,9 @@ def get_affined_image(lyu, image):
         global logo_box
         logo_box = cPts
         if lyu_info is not None:
-            gray = gray_image(lyu_info)
+            lyu_info = gray_image(lyu_info)
         return lyu_info
+
 
 if __name__ == '__main__':
     model = cnn.initial_cnn_model(5)
@@ -40,12 +42,17 @@ if __name__ == '__main__':
             except:
                 pass
             if lyu_info is not None:
+                cv2.imshow('info', lyu_info)
+                cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))
                 arr = np.asarray(gray, dtype='float32').reshape((1, 1, 30, 30))
                 arr /= np.max(arr)
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
-                box_serials = get_box_serials()
+                predict_class = best_class(predict)
+                if predict_class is not None:
+                    box_serials = get_box_serials()
+                    print(box_serials[predict_class])
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)

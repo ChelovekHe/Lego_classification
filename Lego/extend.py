@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import cv2
 from PIL import Image
 from tesserwrap import Tesseract
@@ -9,6 +9,8 @@ temp_count = 1
 train_box = 0
 train_box_logo = 1
 temp_img = None
+predict_list = np.zeros((1, 5), dtype='float32')
+count = 1
 
 
 def denoise_info(img):
@@ -135,4 +137,14 @@ def listdir_no_hidden(path):
             list1.append(f)
     return list1
 
-def best_class():
+def best_class(predict, batch=5):
+    global predict_list, count
+    if count <= batch:
+        temp_list = np.asarray(predict[0], dtype='float32')
+        predict_list = np.add(predict_list, temp_list)
+        count += 1
+    elif count > batch:
+        temp_list1 = predict_list[0]
+        predict_list = np.zeros((1, 5), dtype='float32')
+        count = 1
+        return np.argmax(temp_list1)
