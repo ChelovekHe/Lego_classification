@@ -1,10 +1,10 @@
 #+# PATH #+#
 /Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/
-/Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/data/
-/Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/data/featureImg/
-/Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/data/materialImg/
-/Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/data/boxdata
-/Users/lvypf/OneDrive/myprjs/pythonSpace/CV_legoBoxRecognition/data/logs/
+../data/
+../data/featureImg/
+../data/materialImg/
+../data/boxdata
+../data/logs/
 
 #+# STATEMENT #+#
 Name Number FeatureImg0Name FeatureImg1Name FeatureImg2Name FeatureImg3Name FeatureImg4Name FeatureImg5Name Barcode

@@ -110,7 +110,7 @@ if __name__ == '__main__':
             filtratedCroped = cv2.cvtColor(filtratedCroped,cv2.COLOR_GRAY2RGB)
             filtratedCroped = Image.fromarray(filtratedCroped)
             numStr = tesserOcr(filtratedCroped)
-            numMatch(boxesds,numStr)
+            matched = numMatch(boxesds,numStr)
 #             print(numStr)
 
         showImg = cv2.resize(showImg,(0,0),fx=showNarrowScale,fy=showNarrowScale)
