@@ -138,6 +138,7 @@ def listdir_no_hidden(path):
             list1.append(f)
     return list1
 
+
 def best_class(predict, batch=5):
     global predict_list, count
     if count <= batch:
@@ -160,7 +161,7 @@ def numMatch(boxesds,num):
     matchedProb = dict()
 #     print('+------------------+')
     for item in boxesds:
-        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+        tempSim = Levenshtein.jaro_winkler(str(item.number), num)
         matchedProb.update({item.boxname:tempSim})
 #         print(item.boxname+': '+ str(tempSim))
 #         if(tempSim > maxSim):
@@ -168,3 +169,4 @@ def numMatch(boxesds,num):
 #             matchRst = item.boxname
 #     print('+------------------+\n')
     return matchedProb
+

@@ -17,7 +17,7 @@ def RandomFtestOCR(image):
     
     
     ############################## testing part  #########################
-    clf = joblib.load('bag0.pkl')
+    clf = joblib.load('../data/bag0.pkl')
     im = image
     #im = cv2.imread('legosma15.tiff')
     im = cv2.resize(im, (0,0), fx=1.5, fy=1.5)

@@ -58,18 +58,14 @@ if __name__ == '__main__':
                 pass
             if lyu_info is not None:
                 filtratedCroped = imgFilter(lyu_info)
-                ll = filtratedCroped.copy()
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
                 filtratedCroped = Image.fromarray(filtratedCroped)
                 numStr = tesserOcr(filtratedCroped)
-                # print(numStr)
                 boxesds = read_data()
-                #
                 matched = numMatch(boxesds, numStr)
-                print(matched)
 
                 lyu_info = gray_image(lyu_info)
-                cv2.imshow('info', ll)
+                cv2.imshow('info', lyu_info)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))
                 arr = np.asarray(gray, dtype='float32').reshape((1, 1, 30, 30))
