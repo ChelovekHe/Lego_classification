@@ -45,14 +45,14 @@ def get_rotated_image(li):
         rotated = li.get_rotated_image()
         rotated = resize(rotated, FRAME_SIZE_FACTOR)
         cv2.imshow('rotate', rotated)
-        cv2.moveWindow('rotate',int(1280*FRAME_SIZE_FACTOR),0)
+        cv2.moveWindow('rotate', int(1280*FRAME_SIZE_FACTOR), 0)
 
 def get_info_part(li):
     li_info = li.get_information_part()
     if li_info is not None:
         li_info = cv2.resize(li_info, (info_size, info_size))
         cv2.imshow('li_info', li_info)
-        cv2.moveWindow('li_info',int(1280*FRAME_SIZE_FACTOR),0)
+        cv2.moveWindow('li_info', int(1280*FRAME_SIZE_FACTOR), 0)
     return li_info
 
 if __name__ == '__main__':
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
             # li_info = get_info_part(li)
             # if li_info is not None:
-                # print(compare_iRmage(li_info))
+                # print(compare_image(li_info))
                 # save_info_image(li_info, compare_image(li_info))
             try:
                 lyu_info = get_affined_image(lyu, frame.copy())
@@ -88,4 +88,3 @@ if __name__ == '__main__':
                 break
     cap.release()
     cv2.destroyAllWindows()
-
