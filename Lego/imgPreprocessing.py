@@ -7,6 +7,7 @@
 
 import cv2
 import numpy as np
+from collections import Counter
 
 class LogoAffinePos(object):
     def __init__(self, logoTemplate, featureObject=cv2.KAZE_create(), \
@@ -20,15 +21,14 @@ class LogoAffinePos(object):
         self.matchMethod = matchMethod
         
     # extracting the lego logo(red quadrangle)
-    def extLegoLogo(self, img, minArea = 0):
+    def extLegoLogo(self, img, minArea = 10):
         # It will extract the red area from the image
-        logoContourPts = None
         self.__imgH,self.__imgW,_ = img.shape
         imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-        lower_red = np.array([0,40,40])
+        lower_red = np.array([0,45,40])
         upper_red = np.array([10,255,255])
         mask1 = cv2.inRange(imgHSV,lower_red,upper_red)
-        lower_red = np.array([169,40,40])
+        lower_red = np.array([169,45,40])
         upper_red = np.array([179,255,255])
         mask2 = cv2.inRange(imgHSV,lower_red,upper_red)
         self.redmask = mask1 + mask2
@@ -41,6 +41,8 @@ class LogoAffinePos(object):
         # It will try to get the logo contour
         _,contourPts,_ = cv2.findContours(self.redmask.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contoursPts = sorted(contourPts, key=cv2.contourArea, reverse=True)
+        # Init logoContourPts is None
+        logoContourPts = None
         for idx, contourPts in enumerate(contoursPts):
             # don't find any quadrangle area in first five contours, return false
             if idx > 5:
@@ -52,8 +54,11 @@ class LogoAffinePos(object):
             if ((self.estLength * 4 <= self.perimeter * 1.15) & (self.estLength * 4 >= self.perimeter * 0.85)):
                 if(area < minArea):
                     return None,None,False
-                logoContourPts = contourPts
+                else:
+                    logoContourPts = contourPts
                 break
+            else:
+                pass
 
         logoContour = np.zeros([self.__imgH,self.__imgW],'uint8')
         cv2.drawContours(logoContour, [logoContourPts], -1, 255, 10)
@@ -105,7 +110,7 @@ class LogoAffinePos(object):
         elif (extraRotation > (-angGap-90)) & (extraRotation < (angGap-90)) :
             pp = pp[[1,2,3,0]]
         else:
-            # print("invalied extraRotation:",extraRotation)
+            print("invalied extraRotation:",extraRotation)
             return None, None, False
         
         cPts = cPts[pp]
@@ -150,7 +155,7 @@ class LogoAffinePos(object):
         # get matched key points from both src and dst
         src_pts = np.float64([ self.kpsrc[m.queryIdx].pt for m in goodMatches ]).reshape(-1,1,2)
         dst_pts = np.float64([ kpdst[m.trainIdx].pt for m in goodMatches ]).reshape(-1,1,2)
-        Ang = self.__calcuAngle__(src_pts,dst_pts)
+        Ang = self.__calcuAngle(src_pts,dst_pts)
         if (Ang is None):
             return None
         if(flag == 0):
@@ -176,7 +181,7 @@ class LogoAffinePos(object):
                 Ang = -1*Ang
         return Ang
 
-    def __calcuAngle__(self,pts1,pts2,checks = -1):
+    def __calcuAngle(self,pts1,pts2,checks = -1):
         checkstp = min(len(pts1),len(pts2))-1
         if checks < 0:
             checks = checkstp
@@ -207,7 +212,7 @@ class LogoAffinePos(object):
     
     def rcvAffinedAll(self,img):
         imggray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        imgH,imgW = imggray.shape
+#         imgH,imgW = imggray.shape
 #         [logoContourPts, _, cPts, rtnFlag] = self.extLegoLogo(img)
         logoContourPts, logoContour, rtnFlag = self.extLegoLogo(img, minArea=6000)
         if(rtnFlag is False):
@@ -215,33 +220,63 @@ class LogoAffinePos(object):
         cPts, rtnFlag = self.extQuadrangleCpts(logoContourPts,logoContour)
         if(rtnFlag is False):
             return logoContourPts, cPts, None, None, None, False
-        else:
-            cPtsRes = cPts.copy()
-            cPts, rcvM, _ = self.getRcvAffineInfo(logoContourPts, cPts)
-            imggray = cv2.warpPerspective(imggray, rcvM, (imgW,imgH))
-            affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
-            affinedcPts = affinedcPts.astype('int32')
-            xMax,yMax = affinedcPts.max(axis=0).flatten() + 10
-            xMin,yMin = affinedcPts.min(axis=0).flatten() - 10
-            if((xMin<0) | (yMin<0) | (xMax>imgW) | (yMax>imgH)):
-                return logoContourPts, cPts, affinedcPts, None, None, False
-            
-            cropedImgLogo = imggray[yMin:yMax,xMin:xMax]
-            
-            Ang = self.getRotInfo(cropedImgLogo, None)
-            if Ang is None:
-                return logoContourPts, cPts, affinedcPts, None, None, False
-            else:
-                cPts = cPtsRes.copy()
-                cPts, rcvM, rtnFlag = self.getRcvAffineInfo(logoContourPts, cPts, -Ang)
-                if (rtnFlag is False):
-                    return logoContourPts, cPts, affinedcPts, None, None, False
-                affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
-                affinedImg = cv2.warpPerspective(img, rcvM, (imgW,imgH))
-                
-                expLen = int((yMax+xMax-yMin-xMax)/40)
-                nxMin,nxMax,nyMin,nyMax = [xMin-expLen,xMax+expLen,yMax+expLen,yMax+(yMax-yMin)+expLen]
-                if((nxMin<0) | (nyMin<0) | (nxMax>imgW) | (nyMax>imgH)):
-                    return logoContourPts, cPts, affinedcPts, None, None, False
-                affinedCropedImg = affinedImg[nyMin:nyMax,nxMin:nxMax]
-                return logoContourPts, cPts, affinedcPts, affinedImg, affinedCropedImg, True
+
+        cPtsRes = cPts.copy()
+        cPts, rcvM, _ = self.getRcvAffineInfo(logoContourPts, cPts)
+        imggray = cv2.warpPerspective(imggray, rcvM, (self.__imgW,self.__imgH))
+        affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
+        affinedcPts = affinedcPts.astype('int32')
+        xMax,yMax = affinedcPts.max(axis=0).flatten() + 10
+        xMin,yMin = affinedcPts.min(axis=0).flatten() - 10
+        if((xMin<0) | (yMin<0) | (xMax>self.__imgW) | (yMax>self.__imgH)):
+            return logoContourPts, cPts, affinedcPts, None, None, False
+        
+        cropedImgLogo = imggray[yMin:yMax,xMin:xMax]
+        
+        Ang = self.getRotInfo(cropedImgLogo, None)
+        if Ang is None:
+            return logoContourPts, cPts, affinedcPts, None, None, False
+
+        cPts = cPtsRes.copy()
+        cPts, rcvM, rtnFlag = self.getRcvAffineInfo(logoContourPts, cPts, -Ang)
+        if (rtnFlag is False):
+            return logoContourPts, cPts, affinedcPts, None, None, False
+        affinedcPts = cv2.perspectiveTransform(cPts.copy().astype('float32'),rcvM)
+        affinedImg = cv2.warpPerspective(img, rcvM, (self.__imgW,self.__imgH))
+        
+        expLen = int((yMax+xMax-yMin-xMax)/40)
+        mveLen = int((yMax+xMax-yMin-xMax)/20)
+        nxMin,nxMax,nyMin,nyMax = [xMin-expLen,xMax+expLen,yMax+expLen+mveLen,yMax+(yMax-yMin)+expLen+mveLen+(yMax-yMin)/8]
+        if((nxMin<0) | (nyMin<0) | (nxMax>self.__imgW) | (nyMax>self.__imgH)):
+            return logoContourPts, cPts, affinedcPts, None, None, False
+        affinedCropedImg = affinedImg[nyMin:nyMax,nxMin:nxMax]
+        return logoContourPts, cPts, affinedcPts, affinedImg, affinedCropedImg, True
+
+def imgFilter(img):
+    filtedImg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    _, filtedImg = cv2.threshold(filtedImg,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    counter = Counter(filtedImg.flatten())
+    # if the black area more than half, Invert the color
+    if (counter[0]*2 > filtedImg.size):
+        cdf = np.linspace(255,0,256).astype('uint8')
+        filtedImg = cdf[filtedImg]
+#     filtedImg = cv2.adaptiveThreshold(filtedImg,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+#             cv2.THRESH_BINARY,41,4)
+#     kernel = np.ones((3,3), np.uint8)
+#     filtedImg = cv2.dilate(filtedImg, kernel, iterations=1)
+#     filtedImg = cv2.morphologyEx(filtedImg, cv2.MORPH_OPEN, kernel, iterations=1)
+    return filtedImg
+
+def imgFilter2(img):
+    imgHSV = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+    #for white
+    lower_white = np.array([0,0,100])
+    upper_white = np.array([180,255,255])
+    whiteMask = cv2.inRange(imgHSV, lower_white, upper_white)
+    filtedImg = whiteMask
+    counter = Counter(filtedImg.flatten())
+    # if the black area more than half, Invert the color
+    if (counter[0]*2 > filtedImg.size):
+        cdf = np.linspace(255,0,256).astype('uint8')
+        filtedImg = cdf[filtedImg]
+    return filtedImg
