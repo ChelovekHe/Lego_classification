@@ -58,32 +58,34 @@ def get_info_part(li):
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
     while 1:
-        _, frame = cap.read()
+        ret, frame = cap.read()
 
-        # li = initial_li_class(frame.copy())
-        lyu = initial_lyu_class()
-        # logo_box = li.get_logo_box()
-        # get_rotated_image(li)
+        if ret is True:
+            # li = initial_li_class(frame.copy())
+            lyu = initial_lyu_class()
+            # logo_box = li.get_logo_box()
+            # get_rotated_image(li)
 
-        # li_info = get_info_part(li)
-        # if li_info is not None:
-            # print(compare_image(li_info))
-            # save_info_image(li_info, compare_image(li_info))
-        try:
-            lyu_info = get_affined_image(lyu, frame.copy())
-        except:
-            pass
-        if lyu_info is not None:
-            save_training_info_image(lyu_info)
-            # text = ocr(lyu_info)
+            # li_info = get_info_part(li)
+            # if li_info is not None:
+                # print(compare_iRmage(li_info))
+                # save_info_image(li_info, compare_image(li_info))
+            try:
+                lyu_info = get_affined_image(lyu, frame.copy())
+            except:
+                pass
+            if lyu_info is not None:
+                save_training_info_image(lyu_info)
 
-        cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
-        frame = resize(frame, FRAME_SIZE_FACTOR)
-        frame = put_text(frame.copy())
-        cv2.imshow('frame', frame)
+                # text = ocr(lyu_info)
 
-        if get_keyboard():
-            break
+            cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
+            frame = resize(frame, FRAME_SIZE_FACTOR)
+            frame = put_text(frame.copy())
+            cv2.imshow('frame', frame)
+
+            if get_keyboard():
+                break
     cap.release()
     cv2.destroyAllWindows()
 
