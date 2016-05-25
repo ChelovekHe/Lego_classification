@@ -47,7 +47,7 @@ def numMatch(boxesds,num):
     
     return matchRst
 if __name__ == '__main__':
-    settingInfo = open('./data/setting','r')
+    settingInfo = open('../data/setting','r')
     settingInfo.readline()
     PATH = settingInfo.readline().strip().lstrip().rstrip(',')
     DATAPATH = settingInfo.readline().strip().lstrip().rstrip(',')
