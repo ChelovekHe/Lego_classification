@@ -2,6 +2,8 @@ from Lego.imgPreprocessing import LogoAffinePos
 from Lego.extend import *
 import numpy as np
 import cnn
+from Lego.ocr import tesserOcr
+import Lego.dsOperation as dso
 
 FRAME_SIZE_FACTOR = 0.4
 info_size = 30
@@ -23,9 +25,20 @@ def get_affined_image(lyu, image):
         lyu_info = croped
         global logo_box
         logo_box = cPts
-        if lyu_info is not None:
-            lyu_info = gray_image(lyu_info)
         return lyu_info
+
+def read_data():
+    settingInfo = open('../data/setting', 'r')
+    settingInfo.readline()
+    PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    DATAPATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    FEATURE_IMG_FOLDER = settingInfo.readline().strip().lstrip().rstrip(',')
+    MATERIAL_IMG_FOLDER = settingInfo.readline().strip().lstrip().rstrip(',')
+    BOX_DATA_PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+    LOG_PATH = settingInfo.readline().strip().lstrip().rstrip(',')
+
+    boxesds = dso.dsRead(BOX_DATA_PATH)
+    return  boxesds
 
 
 if __name__ == '__main__':
@@ -42,6 +55,14 @@ if __name__ == '__main__':
             except:
                 pass
             if lyu_info is not None:
+
+                filtratedCroped = cv2.cvtColor(lyu_info, cv2.COLOR_GRAY2RGB)
+                filtratedCroped = Image.fromarray(filtratedCroped)
+                numStr = tesserOcr(filtratedCroped)
+                boxesds = read_data()
+                matched = numMatch(boxesds, numStr)
+
+                lyu_info = gray_image(lyu_info)
                 cv2.imshow('info', lyu_info)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))

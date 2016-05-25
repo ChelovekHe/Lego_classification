@@ -4,6 +4,7 @@ import cv2
 from PIL import Image
 from tesserwrap import Tesseract
 from skimage.measure import compare_ssim as ssim
+import Levenshtein
 
 temp_count = 1
 train_box = 0
@@ -148,3 +149,20 @@ def best_class(predict, batch=5):
         predict_list = np.zeros((1, 5), dtype='float32')
         count = 1
         return np.argmax(temp_list1)
+
+
+def numMatch(boxesds,num):
+    matchRst = None
+    if (num is None):
+        return matchRst
+    tempSim = 0
+    maxSim = 0
+    print('+------------------+')
+    for item in boxesds:
+        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+        print(item.boxname+': '+ str(tempSim))
+        if(tempSim > maxSim):
+            maxSim = tempSim
+            matchRst = item.boxname
+    print('+------------------+\n')
+    return matchRst
