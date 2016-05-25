@@ -5,12 +5,12 @@
 """
 
 import cv2
-from PIL import Image
-import dsOperation as dso
-import imgPreprocessing as imgprep
 import threading
 import time
-from ocr import tesserOcr
+from PIL import Image
+import Lego.dsOperation as dso
+import Lego.imgPreprocessing as imgprep
+from Lego.ocr import tesserOcr
 
 capImg = None
 resImg = None
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     bxnm = input('Input the box name: ')
 #     time.strftime('%Y-%m-%d-%H%M%S',time.localtime(time.time()))
     bx1 = dso.boxds(bxnm)
-    settingInfo = open('./data/setting','r')
+    settingInfo = open('../data/setting','r')
     settingInfo.readline()
     PATH = settingInfo.readline().strip().lstrip().rstrip(',')
     DATAPATH = settingInfo.readline().strip().lstrip().rstrip(',')
