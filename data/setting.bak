@@ -1,0 +1,7 @@
+#+# PATH #+#
+PATH:/Users/lvypf/OneDrive/myprjs/pythonSpace/extractText/
+DATAPATH:/Users/lvypf/OneDrive/myprjs/pythonSpace/extractText/data/
+IMGPATH:/Users/lvypf/OneDrive/myprjs/pythonSpace/extractText/data/featureImg/
+
+#+# STATEMENT #+#
+Name Number FeatureImg0Name FeatureImg1Name FeatureImg2Name FeatureImg3Name FeatureImg4Name FeatureImg5Name Barcode
