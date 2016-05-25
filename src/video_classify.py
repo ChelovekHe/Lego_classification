@@ -1,5 +1,7 @@
 from Lego.imgPreprocessing import LogoAffinePos, imgFilter
 from Lego.extend import *
+import cv2
+from PIL import Image
 import numpy as np
 import cnn
 from Lego.ocr import tesserOcr

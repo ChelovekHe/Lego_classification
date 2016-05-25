@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import cv2
-from PIL import Image
-from tesserwrap import Tesseract
-from skimage.measure import compare_ssim as ssim
+# from PIL import Image
+# from tesserwrap import Tesseract
+# from skimage.measure import compare_ssim as ssim
 import Levenshtein
 
 temp_count = 1
