@@ -69,3 +69,7 @@ fig/
 *.docx
 .DS*
 .idea/
+
+# eclipse setting
+.project
+.pydevproject
