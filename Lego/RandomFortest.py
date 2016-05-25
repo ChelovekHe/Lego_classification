@@ -17,7 +17,7 @@ from sklearn.externals import joblib
 
 
 ############################## testing part  #########################
-clf = joblib.load('bag0.pkl')
+clf = joblib.load('../data/bag0.pkl')
 im = cv2.imread('legosma13.tiff')
 im = cv2.resize(im, (0,0), fx=1.5, fy=1.5)
 out = np.zeros(im.shape,np.uint8)
