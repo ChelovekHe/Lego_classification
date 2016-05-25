@@ -6,6 +6,7 @@ import numpy as np
 import cnn
 from Lego.ocr import tesserOcr
 import Lego.dsOperation as dso
+from Lego.RandomForestOCR import RandomFtestOCR
 
 FRAME_SIZE_FACTOR = 0.4
 info_size = 30
@@ -64,6 +65,8 @@ if __name__ == '__main__':
                 boxesds = read_data()
                 matched = numMatch(boxesds, numStr)
 
+                str = RandomFtestOCR(lyu_info)
+
                 lyu_info = gray_image(lyu_info)
                 cv2.imshow('info', lyu_info)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
@@ -72,10 +75,11 @@ if __name__ == '__main__':
                 arr /= np.max(arr)
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
-                predict_class = best_class(predict)
-                if predict_class is not None:
-                    box_serials = get_box_serials()
-                    # print(box_serials[predict_class])
+                box_serials = get_box_serials()
+                if (predict is not None) & (matched is not None):
+                    predict_class1, predict_class2 = combine_results(predict, matched)
+                    print(box_serials[predict_class1], box_serials[predict_class2], str)
+
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)
