@@ -58,6 +58,7 @@ if __name__ == '__main__':
             except:
                 pass
             if lyu_info is not None:
+                str = []
                 filtratedCroped = imgFilter(lyu_info)
                 lei = filtratedCroped
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
@@ -66,7 +67,8 @@ if __name__ == '__main__':
                 boxesds = read_data()
                 matched = numMatch(boxesds, numStr)
 
-                str = RandomFtestOCR(lei)
+                if lei is not None:
+                    str = RandomFtestOCR(lei)
 
                 lyu_info = gray_image(lyu_info)
                 cv2.imshow('info', lei)

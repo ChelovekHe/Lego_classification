@@ -15,12 +15,12 @@ def RandomFtestOCR(image):
     from skimage.feature import hog
     from sklearn.externals import joblib    
     ############################## testing part  #########################
-    clf = joblib.load('bag0.pkl')
+    clf = joblib.load('../data/bag0.pkl')
     im = image
-    im = cv2.resize(im, (0,0), fx=1, fy=1)
+    im = cv2.resize(im, (0,0), fx=1.5, fy=1.5)
     out = np.zeros(im.shape,np.uint8)
-    gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-    thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
+    # gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+    thresh = cv2.adaptiveThreshold(im,255,1,1,11,2)
     _,contours,hierarchy = cv2.findContours(thresh,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     point = []
     positiony = []
