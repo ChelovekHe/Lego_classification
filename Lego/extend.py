@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import cv2
-# from PIL import Image
 # from tesserwrap import Tesseract
 # from skimage.measure import compare_ssim as ssim
 import Levenshtein
@@ -191,4 +190,3 @@ def numMatch(boxesds,num):
 #             matchRst = item.boxname
 #     print('+------------------+\n')
     return matchedProb
-
