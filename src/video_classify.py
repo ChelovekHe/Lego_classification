@@ -3,7 +3,7 @@ from Lego.extend import *
 import cv2
 from PIL import Image
 import numpy as np
-import cnn
+from cnn import initial_cnn_model
 from Lego.ocr import tesserOcr
 import Lego.dsOperation as dso
 from Lego.RandomForestOCR import RandomFtestOCR
@@ -45,11 +45,13 @@ def read_data():
 
 
 if __name__ == '__main__':
-    model = cnn.initial_cnn_model(5)
+    model = initial_cnn_model(5)
     model.load_weights('../data/lego_identify.h5')
     cap = cv2.VideoCapture(0)
     while 1:
         ret, frame = cap.read()
+        global logo_box
+        logo_box = None
 
         if ret is True:
             lyu = initial_lyu_class()
@@ -59,7 +61,7 @@ if __name__ == '__main__':
                 pass
             if lyu_info is not None:
                 str = []
-                filtratedCroped = imgFilter(lyu_info)
+                filtratedCroped = imgFilter(lyu_info.copy())
                 lei = filtratedCroped
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
                 filtratedCroped = Image.fromarray(filtratedCroped)
@@ -79,13 +81,14 @@ if __name__ == '__main__':
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
                 box_serials = get_box_serials()
-                predict_class1, predict_class2 = combine_results(predict, matched)
+                predict_class1, predict_class2, predict_class3 = combine_results(predict, matched)
 
                 li_result = box_serials[predict_class1]
                 lyu_result = box_serials[predict_class2]
                 lei_result = str
+                combined_result = box_serials[predict_class3]
 
-                print(li_result, lyu_result, str)
+                print(li_result, lyu_result, str, combined_result)
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)

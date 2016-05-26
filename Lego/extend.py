@@ -156,17 +156,19 @@ def combine_results(predict, matches):
     temp_list2 = []
     predict_class1 = 5
     predict_class2 = 5
+    predict_class3 = 5
     temp_list1 = np.asarray(predict[0], dtype='float32')
     if predict is not None:
+        print(predict)
         predict_class1 = np.argmax(temp_list1)
 
     if matches is not None:
-        for i in matches.iteritems():
-            temp_list2.append(i[1])
-        temp_list2 = np.asarray(temp_list2, dtype='float32')
-        # predict_list = np.add(temp_list1, temp_list2)
+        print(matches)
+        temp_list2 = np.asarray(matches, dtype='float32')
         predict_class2 = np.argmax(temp_list2)
-    return predict_class1, predict_class2
+        temp_list3 = np.add(temp_list1, temp_list2)
+        predict_class3 = np.argmax(temp_list3)
+    return predict_class1, predict_class2, predict_class3
 
 
 def numMatch(boxesds,num):
@@ -175,11 +177,14 @@ def numMatch(boxesds,num):
         return matchedProb
 #     tempSim = 0
 #     maxSim = 0
-    matchedProb = dict()
+#     matchedProb = dict()
+    matchedProb = []
 #     print('+------------------+')
+#     print(boxesds[0].boxname,boxesds[1].boxname,boxesds[2].boxname,boxesds[3].boxname,boxesds[4].boxname)
     for item in boxesds:
-        tempSim = Levenshtein.jaro_winkler(str(item.number), num)
-        matchedProb.update({item.boxname:tempSim})
+        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+        matchedProb.append(tempSim)
+#         matchedProb.update({item.boxname:tempSim})
 #         print(item.boxname+': '+ str(tempSim))
 #         if(tempSim > maxSim):
 #             maxSim = tempSim

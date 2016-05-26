@@ -100,6 +100,7 @@ def dsRead(filePath):
         bxes[-1].changeName(boxStrSplit[0])
         bxes[-1].setNumber(boxStrSplit[1])
         bxes[-1].setImgFolder(boxStrSplit[2])
+#         print(bxes)
         imgNames = []
         imgs = []
         for i in range(6):
@@ -112,4 +113,5 @@ def dsRead(filePath):
         bxes[-1].setFeatureImgsName(imgNames)
         bxes[-1].setFeatureImgs(imgs)
 #         print(bxes[-1])
+#     print(bxes[0].boxname,bxes[1].boxname,bxes[2].boxname,bxes[3].boxname,bxes[4].boxname)
     return bxes
