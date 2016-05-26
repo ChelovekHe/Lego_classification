@@ -14,7 +14,6 @@ import Lego.imgPreprocessing as imgprep
 from Lego.ocr import tesserOcr
 from Lego.extend import numMatch
 
-
 capImg = None
 resImg = None
 stopFlat = 0

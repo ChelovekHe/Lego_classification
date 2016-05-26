@@ -156,11 +156,14 @@ def numMatch(boxesds,num):
         return matchedProb
 #     tempSim = 0
 #     maxSim = 0
-    matchedProb = dict()
+#     matchedProb = dict()
+    matchedProb = []
 #     print('+------------------+')
+#     print(boxesds[0].boxname,boxesds[1].boxname,boxesds[2].boxname,boxesds[3].boxname,boxesds[4].boxname)
     for item in boxesds:
         tempSim = Levenshtein.jaro_winkler(str(item.number),num)
-        matchedProb.update({item.boxname:tempSim})
+        matchedProb.append(tempSim)
+#         matchedProb.update({item.boxname:tempSim})
 #         print(item.boxname+': '+ str(tempSim))
 #         if(tempSim > maxSim):
 #             maxSim = tempSim
