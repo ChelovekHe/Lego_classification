@@ -1,9 +1,9 @@
 import os
 import numpy as np
 import cv2
-from PIL import Image
-from tesserwrap import Tesseract
-from skimage.measure import compare_ssim as ssim
+# from PIL import Image
+# from tesserwrap import Tesseract
+# from skimage.measure import compare_ssim as ssim
 import Levenshtein
 
 temp_count = 1
@@ -138,6 +138,7 @@ def listdir_no_hidden(path):
             list1.append(f)
     return list1
 
+
 def best_class(predict, batch=5):
     global predict_list, count
     if count <= batch:
@@ -150,7 +151,24 @@ def best_class(predict, batch=5):
         count = 1
         return np.argmax(temp_list1)
 
-    
+
+def combine_results(predict, matches):
+    temp_list2 = []
+    predict_class1 = 5
+    predict_class2 = 5
+    temp_list1 = np.asarray(predict[0], dtype='float32')
+    if predict is not None:
+        predict_class1 = np.argmax(temp_list1)
+
+    if matches is not None:
+        for i in matches.iteritems():
+            temp_list2.append(i[1])
+        temp_list2 = np.asarray(temp_list2, dtype='float32')
+        # predict_list = np.add(temp_list1, temp_list2)
+        predict_class2 = np.argmax(temp_list2)
+    return predict_class1, predict_class2
+
+
 def numMatch(boxesds,num):
     matchedProb = None
     if (num is None):
@@ -160,7 +178,7 @@ def numMatch(boxesds,num):
     matchedProb = dict()
 #     print('+------------------+')
     for item in boxesds:
-        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+        tempSim = Levenshtein.jaro_winkler(str(item.number), num)
         matchedProb.update({item.boxname:tempSim})
 #         print(item.boxname+': '+ str(tempSim))
 #         if(tempSim > maxSim):
@@ -168,3 +186,4 @@ def numMatch(boxesds,num):
 #             matchRst = item.boxname
 #     print('+------------------+\n')
     return matchedProb
+

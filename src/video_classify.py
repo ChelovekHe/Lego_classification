@@ -1,9 +1,12 @@
 from Lego.imgPreprocessing import LogoAffinePos, imgFilter
 from Lego.extend import *
+import cv2
+from PIL import Image
 import numpy as np
 import cnn
 from Lego.ocr import tesserOcr
 import Lego.dsOperation as dso
+from Lego.RandomForestOCR import RandomFtestOCR
 
 FRAME_SIZE_FACTOR = 0.4
 info_size = 30
@@ -56,28 +59,31 @@ if __name__ == '__main__':
                 pass
             if lyu_info is not None:
                 filtratedCroped = imgFilter(lyu_info)
-                ll = filtratedCroped.copy()
+                lei = filtratedCroped
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
                 filtratedCroped = Image.fromarray(filtratedCroped)
                 numStr = tesserOcr(filtratedCroped)
-                # print(numStr)
                 boxesds = read_data()
-                #
                 matched = numMatch(boxesds, numStr)
-                print(matched)
+
+                str = RandomFtestOCR(lei)
 
                 lyu_info = gray_image(lyu_info)
-                cv2.imshow('info', ll)
+                cv2.imshow('info', lei)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))
                 arr = np.asarray(gray, dtype='float32').reshape((1, 1, 30, 30))
                 arr /= np.max(arr)
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
-                predict_class = best_class(predict)
-                if predict_class is not None:
-                    box_serials = get_box_serials()
-                    # print(box_serials[predict_class])
+                box_serials = get_box_serials()
+                predict_class1, predict_class2 = combine_results(predict, matched)
+
+                li_result = box_serials[predict_class1]
+                lyu_result = box_serials[predict_class2]
+                lei_result = str
+
+                print(li_result, lyu_result, str)
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)

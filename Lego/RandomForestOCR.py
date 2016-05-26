@@ -7,20 +7,21 @@ Created on Thu May 26 05:08:24 2016
 def RandomFtestOCR(image):
     import numpy as np
     import cv2
-    from matplotlib import pyplot as plt
-    import copy
-    import sys
-    import operator
+    # from matplotlib import pyplot as plt
+    # import copy
+    # import sys
+    # import operator
     from collections import Counter
     from skimage.feature import hog
     from sklearn.externals import joblib    
     ############################## testing part  #########################
-    clf = joblib.load('bag0.pkl')
+    clf = joblib.load('../data/bag0.pkl')
     im = image
     im = cv2.resize(im, (0,0), fx=1, fy=1)
     out = np.zeros(im.shape,np.uint8)
-    gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
-    thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
+    # gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+    # thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
+    thresh = im
     _,contours,hierarchy = cv2.findContours(thresh,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     point = []
     positiony = []
@@ -60,13 +61,23 @@ def RandomFtestOCR(image):
             [x,y,w,h] = cv2.boundingRect(cnt)
             if  h>=10:
                 if y/toleranty == Mosty:
+<<<<<<< HEAD
                     T =T+1
+=======
+                    # if h/toleranth == Mosth:
+                    T=T+1
+>>>>>>> origin/dev
                     cv2.rectangle(im,(x,y),(x+w,y+h),(0,255,0),2)
                     roi = thresh[y:y+h,x:x+w]
                     roi_canny = cv2.Canny(roi,50,125)
                     roismall = cv2.resize(roi,(16,16))
+<<<<<<< HEAD
                     fd, hog_image = hog(roismall, orientations=16, pixels_per_cell=(4, 4),cells_per_block=(1, 1), visualise=True)               
                     roismall_hog = fd.reshape((1,fd.size))             
+=======
+                    fd, hog_image = hog(roismall, orientations=16, pixels_per_cell=(4, 4),cells_per_block=(1, 1), visualise=True)
+                    roismall_hog = fd.reshape((1,fd.size))
+>>>>>>> origin/dev
                     roismall_canny = cv2.resize(roi_canny,(16,16))
                     roismall = roismall.reshape((1,256))
                     roismall_canny = roismall_canny.reshape((1,256))
@@ -81,7 +92,11 @@ def RandomFtestOCR(image):
                         cv2.putText(out,string,(x,y+h),0,1,(0,255,0))
                         numresult = np.append(numresult,results)
                         X = np.append(X,x)
+<<<<<<< HEAD
                     else: 
+=======
+                    else:
+>>>>>>> origin/dev
                         more = np.append(more,results)
                         more = np.append(more,results_canny)
                         more = np.append(more,results_hog)
@@ -89,7 +104,13 @@ def RandomFtestOCR(image):
                         string = str(mostresult)
                         cv2.putText(out,string,(x,y+h),0,1,(0,255,0))
                         numresult = np.append(numresult,mostresult)
+<<<<<<< HEAD
                         X = np.append(X,x)                    
+=======
+                        X = np.append(X,x)
+
+
+>>>>>>> origin/dev
     X1 = np.sort(X)
     S = np.size(X1)-1
     X2 = []
