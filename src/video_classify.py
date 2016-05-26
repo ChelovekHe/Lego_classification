@@ -59,16 +59,17 @@ if __name__ == '__main__':
                 pass
             if lyu_info is not None:
                 filtratedCroped = imgFilter(lyu_info)
+                lei = filtratedCroped
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
                 filtratedCroped = Image.fromarray(filtratedCroped)
                 numStr = tesserOcr(filtratedCroped)
                 boxesds = read_data()
                 matched = numMatch(boxesds, numStr)
 
-                str = RandomFtestOCR(lyu_info)
+                str = RandomFtestOCR(lei)
 
                 lyu_info = gray_image(lyu_info)
-                cv2.imshow('info', lyu_info)
+                cv2.imshow('info', lei)
                 cv2.moveWindow('info', int(1280 * FRAME_SIZE_FACTOR), 0)
                 gray = cv2.resize(lyu_info, (info_size, info_size))
                 arr = np.asarray(gray, dtype='float32').reshape((1, 1, 30, 30))
@@ -76,10 +77,13 @@ if __name__ == '__main__':
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
                 box_serials = get_box_serials()
-                if (predict is not None) & (matched is not None):
-                    predict_class1, predict_class2 = combine_results(predict, matched)
-                    print(box_serials[predict_class1], box_serials[predict_class2], str)
+                predict_class1, predict_class2 = combine_results(predict, matched)
 
+                li_result = box_serials[predict_class1]
+                lyu_result = box_serials[predict_class2]
+                lei_result = str
+
+                print(li_result, lyu_result, str)
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)

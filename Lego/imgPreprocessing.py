@@ -110,7 +110,7 @@ class LogoAffinePos(object):
         elif (extraRotation > (-angGap-90)) & (extraRotation < (angGap-90)) :
             pp = pp[[1,2,3,0]]
         else:
-            print("invalied extraRotation:",extraRotation)
+            # print("invalied extraRotation:",extraRotation)
             return None, None, False
         
         cPts = cPts[pp]
