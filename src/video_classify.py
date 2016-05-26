@@ -12,6 +12,8 @@ FRAME_SIZE_FACTOR = 0.4
 info_size = 30
 logo_box = None
 lyu_info = None
+count = 1
+lei_matched = None
 
 
 def initial_lyu_class():
@@ -45,13 +47,13 @@ def read_data():
 
 
 if __name__ == '__main__':
+    global logo_box, lyu_info, count
+
     model = initial_cnn_model(5)
-    model.load_weights('../data/lego_identify.h5')
+    model.load_weights('../data/lego_identify_best.h5')
     cap = cv2.VideoCapture(0)
     while 1:
         ret, frame = cap.read()
-        global logo_box
-        logo_box = None
 
         if ret is True:
             lyu = initial_lyu_class()
@@ -60,7 +62,7 @@ if __name__ == '__main__':
             except:
                 pass
             if lyu_info is not None:
-                str = []
+                str1 = []
                 filtratedCroped = imgFilter(lyu_info.copy())
                 lei = filtratedCroped
                 filtratedCroped = cv2.cvtColor(filtratedCroped, cv2.COLOR_GRAY2RGB)
@@ -70,7 +72,8 @@ if __name__ == '__main__':
                 matched = numMatch(boxesds, numStr)
 
                 if lei is not None:
-                    str = RandomFtestOCR(lei)
+                    str1 = RandomFtestOCR(lei)
+                    lei_matched = numMatch(boxesds, str1)
 
                 lyu_info = gray_image(lyu_info)
                 cv2.imshow('info', lei)
@@ -81,14 +84,17 @@ if __name__ == '__main__':
                 arr -= np.std(arr)
                 predict = model.predict(arr, batch_size=1)
                 box_serials = get_box_serials()
-                predict_class1, predict_class2, predict_class3 = combine_results(predict, matched)
+                predict_class, cnn, lyu, lei = combine_results(predict, matched, lei_matched)
 
-                li_result = box_serials[predict_class1]
-                lyu_result = box_serials[predict_class2]
-                lei_result = str
-                combined_result = box_serials[predict_class3]
+                li_result = box_serials[cnn]
+                lyu_result = box_serials[lyu]
+                lei_result = box_serials[lei]
+                combined_result = box_serials[predict_class]
 
-                print(li_result, lyu_result, str, combined_result)
+                print('======================'+'No. '+str(count)+' detection'+'========================')
+                print('CNN Result: '+li_result+'         '+'OCR Result: '+lyu_result+' '+lei_result)
+                print('Combined Result: '+combined_result+'\n')
+                count += 1
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)
             frame = resize(frame, FRAME_SIZE_FACTOR)
