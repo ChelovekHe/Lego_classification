@@ -1,8 +1,6 @@
 import os
 import numpy as np
 import cv2
-# from tesserwrap import Tesseract
-# from skimage.measure import compare_ssim as ssim
 import Levenshtein
 
 temp_count = 1

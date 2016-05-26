@@ -17,9 +17,9 @@ Packaging Identification
 
 **Figures below is from the Box 6 kit, contain 6 images from 6 different orientation**
 
-![alt text](https://github.com/harrysocool/package_identification/blob/master/fig_sample/1.pic_hd.jpg "fig 1")
-![alt text](https://github.com/harrysocool/package_identification/blob/master/fig_sample/2.pic_hd.jpg "fig 2")
-![alt text](https://github.com/harrysocool/package_identification/blob/master/fig_sample/3.pic_hd.jpg "fig 3")
-![alt text](https://github.com/harrysocool/package_identification/blob/master/fig_sample/4.pic_hd.jpg "fig 4")
-![alt 5ext](https://github.com/harrysocool/package_identification/blob/master/fig_sample/5.pic_hd.jpg "fig 5")
-![alt text](https://github.com/harrysocool/package_identification/blob/master/fig_sample/6.pic_hd.jpg "fig 6")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/1.pic_hd.jpg "fig 1")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/2.pic_hd.jpg "fig 2")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/3.pic_hd.jpg "fig 3")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/4.pic_hd.jpg "fig 4")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/5.pic_hd.jpg "fig 5")
+![alt text](https://github.com/sotondriver/Lego_classification/blob/master/fig_sample/6.pic_hd.jpg "fig 6")
