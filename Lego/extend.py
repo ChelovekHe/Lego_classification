@@ -163,8 +163,13 @@ def combine_results(predict, matches):
         print(matches)
         temp_list2 = np.asarray(matches, dtype='float32')
         predict_class2 = np.argmax(temp_list2)
+    
+    if max(matches) is 1:
+        predict_class3 = np.argwhere(1)
+    else:
         temp_list3 = np.add(temp_list1, temp_list2)
         predict_class3 = np.argmax(temp_list3)
+    
     return predict_class1, predict_class2, predict_class3
 
 
