@@ -11,7 +11,7 @@ import Lego.imgPreprocessing as imgprep
 from Lego.ocr import tesserOcr
 
 if __name__ == '__main__':
-    settingInfo = open('./data/setting','r')
+    settingInfo = open('../data/setting','r')
     settingInfo.readline()
     PATH = settingInfo.readline().strip().lstrip().rstrip(',')
     DATAPATH = settingInfo.readline().strip().lstrip().rstrip(',')
@@ -25,10 +25,10 @@ if __name__ == '__main__':
 #     logoAffinePos = imgprep.LogoAffinePos(logoTp,featureObject=cv2.AKAZE_create(), matcherObject=cv2.BFMatcher(), \
 #                                                     matchMethod = 'knnMatch')
 
-    VWIDTH = 1600
-    VHIGH = 900
-#     VWIDTH = 1280
-#     VHIGH = 720
+#     VWIDTH = 1600
+#     VHIGH = 900
+    VWIDTH = 1280
+    VHIGH = 720
 #     VWIDTH = 960
 #     VHIGH = 540
     cap = cv2.VideoCapture(0)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     img2 = img.copy()
     img3 = img.copy()
     img4 = img.copy()
-    showNarrowScale = 0.4
+    showNarrowScale = 0.6
     startPosx = 50
     startPosy = 50
 #     cnt = 0
@@ -61,17 +61,20 @@ if __name__ == '__main__':
                     img[cPt[1]-ptsize:cPt[1]+ptsize,cPt[0]-ptsize:cPt[0]+ptsize,:] = [255,255,0]
         
         if (rtnFlag is True):
+            
             affinedImgNarrow = cv2.resize(affinedImg,(0,0),fx=showNarrowScale,fy=showNarrowScale)
             cv2.imshow('croped',affinedCropedImg)
-            cv2.moveWindow('croped',startPosx+int(showNarrowScale*VWIDTH),startPosy)
+#             cv2.moveWindow('croped',startPosx+int(showNarrowScale*VWIDTH),startPosy)
+            cv2.moveWindow('croped',startPosx,startPosy+int(showNarrowScale*VHIGH+10))
 #             filtedCroped = imgprep.imgFilter2(affinedCropedImg)
             filtedCroped = imgprep.imgFilter(affinedCropedImg)
             cv2.imshow('filtedCroped',filtedCroped)
-            cv2.moveWindow('filtedCroped',startPosx+int(showNarrowScale*VWIDTH)+filtedCroped.shape[1],startPosy) 
+#             cv2.moveWindow('filtedCroped',startPosx+int(showNarrowScale*VWIDTH)+filtedCroped.shape[1],startPosy) 
+            cv2.moveWindow('filtedCroped',startPosx+filtedCroped.shape[1],startPosy+int(showNarrowScale*VHIGH)+10) 
             filtedCroped = cv2.cvtColor(filtedCroped,cv2.COLOR_GRAY2RGB)
             filtedCroped = Image.fromarray(filtedCroped)
-            numStr = tesserOcr(filtedCroped)
-            print(numStr)
+#             numStr = tesserOcr(filtedCroped)
+#             print(numStr)
 
         imgNarrow = cv2.resize(img,(0,0),fx=showNarrowScale,fy=showNarrowScale)
         redmaskNarrow = cv2.resize(logoAffinePos.redmask,(0,0),fx=showNarrowScale,fy=showNarrowScale)
