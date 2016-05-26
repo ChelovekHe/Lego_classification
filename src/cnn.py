@@ -5,9 +5,22 @@ from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD, Adadelta, Adagrad
 from keras.utils import np_utils, generic_utils
-from Lego.extend import listdir_no_hidden
+# import matplotlib.pyplot as plt
+import os
 import keras
+# import pylab as pl
+import theano
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+# import matplotlib.cm as cm
+import numpy.ma as ma
 
+
+def listdir_no_hidden(path):
+    list1 = []
+    for f in os.listdir(path):
+        if not f.startswith('.'):
+            list1.append(f)
+    return list1
 
 def initial_cnn_model(nb_class):
     # initial cnn model
@@ -69,7 +82,7 @@ def train_model(model):
     test_label = np_utils.to_categorical(test_label)
 
     batch_size = 100
-    nb_epoch = 60
+    nb_epoch = 80
 
     check = keras.callbacks.ModelCheckpoint('../data/lego_identify_best.h5', monitor='val_loss',
                                             verbose=0, save_best_only=True, mode='auto')
@@ -122,8 +135,75 @@ def load_test_data():
     return data, label
 
 
+def nice_imshow(ax, data, vmin=None, vmax=None, cmap=None):
+    """Wrapper around pl.imshow"""
+    if cmap is None:
+        cmap = cm.jet
+    if vmin is None:
+        vmin = data.min()
+    if vmax is None:
+        vmax = data.max()
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    im = ax.imshow(data, vmin=vmin, vmax=vmax, interpolation='nearest', cmap=cmap)
+    pl.colorbar(im, cax=cax)
+    return im
+
+
+def make_mosaic(imgs, nrows, ncols, border=1):
+    """
+    Given a set of images with all the same shape, makes a
+    mosaic with nrows and ncols
+    """
+    nimgs = imgs.shape[0]
+    imshape = imgs.shape[1:]
+
+    mosaic = ma.masked_all((nrows * imshape[0] + (nrows - 1) * border,
+                            ncols * imshape[1] + (ncols - 1) * border),
+                           dtype=np.float32)
+
+    paddedh = imshape[0] + border
+    paddedw = imshape[1] + border
+    for i in xrange(nimgs):
+        row = int(np.floor(i / ncols))
+        col = i % ncols
+
+        mosaic[row * paddedh:row * paddedh + imshape[0],
+        col * paddedw:col * paddedw + imshape[1]] = imgs[i]
+    return mosaic
+
+def visualise(model):
+    # define theano funtion to get output of  first Conv layer
+    get_featuremap = theano.function([model.layers[0].input], model.layers[0].get_output_at(0),
+                                     allow_input_downcast=False)
+    data, label = load_data()
+
+    # num_fmap = 32  # number of feature map
+    # for i in range(num_fmap):
+    #     featuremap = get_featuremap(data[0:1])
+    #     plt.imshow(featuremap[0][i], cmap=cm.Greys_r)  # visualize the first image's 4 feature map
+    #     plt.show()
+    #
+    # C1 = get_featuremap(data[0:1])
+    # C1 = np.squeeze(C1)
+    # print("C1 shape : ", C1.shape)
+    # W = np.squeeze(C1)
+    # pl.figure(figsize=(15, 15))
+    # pl.title('conv1 weights')
+    # nice_imshow(pl.gca(), make_mosaic(W, 6, 6), cmap=cm.binary)
+
+
 if __name__ == '__main__':
     model = initial_cnn_model(5)
-    # model.load_weights('../data/lego_identify.h5')
-    model = train_model(model)
-    model.save_weights('../data/lego_identify.h5', overwrite=True)
+    model.load_weights('../data/lego_identify.h5')
+    visualise(model)
+
+    # W = model.layers[0].W.get_value(borrow=True)
+    # W = np.squeeze(W)
+    # print("W shape : ", W.shape)
+
+
+
+
+    # model = train_model(model)
+    # model.save_weights('../data/lego_identify.h5', overwrite=True)

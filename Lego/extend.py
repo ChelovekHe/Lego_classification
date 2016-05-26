@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import cv2
-# from PIL import Image
 # from tesserwrap import Tesseract
 # from skimage.measure import compare_ssim as ssim
 import Levenshtein
@@ -153,15 +152,22 @@ def best_class(predict, batch=5):
 
 
 def combine_results(predict, matches):
-    temp_list1 = np.asarray(predict[0], dtype='float32')
     temp_list2 = []
-    for i in matches.iteritems():
-        temp_list2.append(i[1])
-    temp_list2 = np.asarray(temp_list2, dtype='float32')
-    predict_list = np.add(temp_list1, temp_list2)
-    predict_class1 = np.argmax(temp_list1)
-    predict_class2 = np.argmax(temp_list2)
-    return predict_class1, predict_class2
+    predict_class1 = 5
+    predict_class2 = 5
+    predict_class3 = 5
+    temp_list1 = np.asarray(predict[0], dtype='float32')
+    if predict is not None:
+        print(predict)
+        predict_class1 = np.argmax(temp_list1)
+
+    if matches is not None:
+        print(matches)
+        temp_list2 = np.asarray(matches, dtype='float32')
+        predict_class2 = np.argmax(temp_list2)
+        temp_list3 = np.add(temp_list1, temp_list2)
+        predict_class3 = np.argmax(temp_list3)
+    return predict_class1, predict_class2, predict_class3
 
 
 def numMatch(boxesds,num):
@@ -170,15 +176,17 @@ def numMatch(boxesds,num):
         return matchedProb
 #     tempSim = 0
 #     maxSim = 0
-    matchedProb = dict()
+#     matchedProb = dict()
+    matchedProb = []
 #     print('+------------------+')
+#     print(boxesds[0].boxname,boxesds[1].boxname,boxesds[2].boxname,boxesds[3].boxname,boxesds[4].boxname)
     for item in boxesds:
-        tempSim = Levenshtein.jaro_winkler(str(item.number), num)
-        matchedProb.update({item.boxname:tempSim})
+        tempSim = Levenshtein.jaro_winkler(str(item.number),num)
+        matchedProb.append(tempSim)
+#         matchedProb.update({item.boxname:tempSim})
 #         print(item.boxname+': '+ str(tempSim))
 #         if(tempSim > maxSim):
 #             maxSim = tempSim
 #             matchRst = item.boxname
 #     print('+------------------+\n')
     return matchedProb
-

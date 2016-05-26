@@ -9,7 +9,6 @@ import cv2
 from PIL import Image
 import numpy as np
 from pytesseract import image_to_string
-from tesserwrap import Tesseract
 
 def tesserOcr(img):
     numStr = None
