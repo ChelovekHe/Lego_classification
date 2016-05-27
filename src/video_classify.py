@@ -1,3 +1,5 @@
+import sys
+
 from Lego.imgPreprocessing import LogoAffinePos, imgFilter
 from Lego.extend import *
 import cv2
@@ -8,7 +10,7 @@ from Lego.ocr import tesserOcr
 import Lego.dsOperation as dso
 from Lego.RandomForestOCR import RandomFtestOCR
 
-FRAME_SIZE_FACTOR = 0.4
+FRAME_SIZE_FACTOR = 0.8
 info_size = 30
 logo_box = None
 lyu_info = None
@@ -47,6 +49,7 @@ def read_data():
 
 
 if __name__ == '__main__':
+    sys.path.append('..')
     global logo_box, lyu_info, count
 
     model = initial_cnn_model(5)
@@ -91,9 +94,9 @@ if __name__ == '__main__':
                 lei_result = box_serials[lei]
                 combined_result = box_serials[predict_class]
 
-                print('======================'+'No. '+str(count)+' detection'+'========================')
+                print('======================'+'No.'+str(count)+' detection'+'========================')
                 print('CNN Result: '+li_result+'         '+'OCR Result: '+lyu_result+' '+lei_result)
-                print('Combined Result: '+combined_result+'\n')
+                print('Combined Result: '+combined_result+'\n\n')
                 count += 1
 
             cv2.drawContours(frame, [logo_box], -1, (0, 255, 0), 2)

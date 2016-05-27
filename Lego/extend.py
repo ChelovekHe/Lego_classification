@@ -172,6 +172,7 @@ def combine_results(predict, matches, lei):
     else:
         # print(matches)
         temp_list2 = np.asarray(matches, dtype='float32')
+
         temp_list3 = np.asarray(lei, dtype='float32')
         temp_list4 = np.add(temp_list3, temp_list2)
         predict_class = np.argmax(temp_list4)
