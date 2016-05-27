@@ -30,15 +30,15 @@ def initial_cnn_model(nb_class):
     # activate function "relu"
     model.add(Convolution2D(32, 3, 3, border_mode='valid', input_shape=(1, 30, 30)))
     model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
-    model.add(Activation('relu'))
+    # model.add(Convolution2D(32, 3, 3))
+    # model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.5))
 
     model.add(Convolution2D(32, 3, 3, border_mode='valid'))
     model.add(Activation('relu'))
-    model.add(Convolution2D(32, 3, 3))
-    model.add(Activation('relu'))
+    # model.add(Convolution2D(32, 3, 3))
+    # model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.5))
 
@@ -191,11 +191,12 @@ def visualise(model):
     # pl.figure(figsize=(15, 15))
     # pl.title('conv1 weights')
     # nice_imshow(pl.gca(), make_mosaic(W, 6, 6), cmap=cm.binary)
+    # print('.')
 
 
 if __name__ == '__main__':
     model = initial_cnn_model(5)
-    model.load_weights('../data/lego_identify.h5')
+    model.load_weights('../data/lego_identify_best.h5')
     visualise(model)
 
     # W = model.layers[0].W.get_value(borrow=True)

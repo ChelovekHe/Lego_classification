@@ -149,19 +149,30 @@ def best_class(predict, batch=5):
         return np.argmax(temp_list1)
 
 
-def combine_results(predict, matches):
+def combine_results(predict, matches, lei):
     temp_list2 = []
     predict_class1 = 5
-    predict_class2 = 5
-    predict_class3 = 5
+    cnn = 5
+    lyu = 5
+    lei_class = 5
     temp_list1 = np.asarray(predict[0], dtype='float32')
     if predict is not None:
-        print(predict)
-        predict_class1 = np.argmax(temp_list1)
-
+        cnn = np.argmax(temp_list1)
     if matches is not None:
-        print(matches)
+        lyu = np.argmax(matches)
+    if lei is not None:
+        lei_class = np.argmax(lei)
+
+    if matches is None:
+        predict_class = cnn
+    elif max(matches) == 1:
+        predict_class = np.argmax(matches)
+    elif max(lei) == 1:
+        predict_class = np.argmax(lei)
+    else:
+        # print(matches)
         temp_list2 = np.asarray(matches, dtype='float32')
+<<<<<<< HEAD
         predict_class2 = np.argmax(temp_list2)
     
     if max(matches) is 1:
@@ -171,6 +182,12 @@ def combine_results(predict, matches):
         predict_class3 = np.argmax(temp_list3)
     
     return predict_class1, predict_class2, predict_class3
+=======
+        temp_list3 = np.asarray(lei, dtype='float32')
+        temp_list4 = np.add(temp_list3, temp_list2)
+        predict_class = np.argmax(temp_list4)
+    return predict_class, cnn, lyu, lei_class
+>>>>>>> 613c66e453775d96efbd4ea28788ddf1a0bb838b
 
 
 def numMatch(boxesds,num):
