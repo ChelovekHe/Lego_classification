@@ -1,3 +1,5 @@
+import sys
+
 from Lego.imgPreprocessing import LogoAffinePos, imgFilter
 from Lego.extend import *
 import cv2
@@ -47,6 +49,7 @@ def read_data():
 
 
 if __name__ == '__main__':
+    sys.path.append('..')
     global logo_box, lyu_info, count
 
     model = initial_cnn_model(5)
