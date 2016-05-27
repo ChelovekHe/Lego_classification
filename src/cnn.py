@@ -191,12 +191,13 @@ def visualise(model):
     # pl.figure(figsize=(15, 15))
     # pl.title('conv1 weights')
     # nice_imshow(pl.gca(), make_mosaic(W, 6, 6), cmap=cm.binary)
+    # print('.')
 
 
 if __name__ == '__main__':
     model = initial_cnn_model(5)
-    # model.load_weights('../data/lego_identify.h5')
-    # visualise(model)
+    model.load_weights('../data/lego_identify_best.h5')
+    visualise(model)
 
     # W = model.layers[0].W.get_value(borrow=True)
     # W = np.squeeze(W)
@@ -205,5 +206,5 @@ if __name__ == '__main__':
 
 
 
-    model = train_model(model)
-    model.save_weights('../data/lego_identify.h5', overwrite=True)
+    # model = train_model(model)
+    # model.save_weights('../data/lego_identify.h5', overwrite=True)
